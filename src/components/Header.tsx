@@ -2,586 +2,455 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
-  ShoppingBag,
-  Menu,
-  X,
   ChevronDown,
-  ArrowUpRight,
+  Heart,
+  Menu,
+  Search,
+  ShoppingBag,
+  X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import AnnouncementBar from "@/components/AnnouncementBar";
+import SearchOverlay from "@/components/SearchOverlay";
+import { cn } from "@/lib/cn";
+
+const NAV_LINKS = [
+  { href: "/", label: "Home" },
+  { href: "/story", label: "Story" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
+const COLLECTION_LINKS = [
+  {
+    href: "/collection/gems",
+    label: "Gems Collection",
+    image: "/images/collections/gems-home.jpg",
+  },
+  {
+    href: "/collection/takeoff",
+    label: "Take Off Collection",
+    image: "/images/collections/takeoff-home.jpg",
+  },
+] as const;
 
 export default function Header() {
+  const pathname = usePathname();
+  const { itemCount, openDrawer } = useCart();
+  const { itemCount: wishlistCount } = useWishlist();
+
+  const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [shopOpen, setShopOpen] = useState(false);
+  const [collectionOpen, setCollectionOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
-  const shopMenuRef = useRef<HTMLDivElement>(null);
+  const collectionRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<number | null>(null);
 
-  // Close all menus
+  const previousPathname = useRef(pathname);
+
+  const isHome = pathname === "/";
+  const isStory = pathname === "/story";
+  const isCollectionHero =
+    pathname === "/collection" ||
+    pathname === "/collection/gems" ||
+    pathname === "/collection/takeoff";
+  const isTransparent =
+    (isHome || isStory || isCollectionHero) &&
+    !scrolled &&
+    !menuOpen &&
+    !searchOpen;
+
   const closeMenus = () => {
     setMenuOpen(false);
-    setShopOpen(false);
+    setCollectionOpen(false);
   };
 
-  // Close menus with ESC
+  const cancelClose = () => {
+    if (closeTimer.current) {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer.current = window.setTimeout(() => {
+      setCollectionOpen(false);
+    }, 180);
+  };
+
   useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        closeMenus();
-      }
+    const onScroll = () => {
+      const next = window.scrollY > 24;
+      setScrolled((current) => (current === next ? current : next));
     };
 
-    document.addEventListener("keydown", handleEscape);
+    window.addEventListener("scroll", onScroll, { passive: true });
 
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-    };
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /*// Close desktop Shop menu when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
+    if (previousPathname.current === pathname) {
+      return;
+    }
 
-      if (
-        shopMenuRef.current &&
-        !shopMenuRef.current.contains(target)
-      ) {
-        setShopOpen(false);
+    previousPathname.current = pathname;
+    closeMenus();
+    setSearchOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeMenus();
+        setSearchOpen(false);
       }
     };
 
-    if (shopOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const onPointerDown = (event: MouseEvent) => {
+      if (
+        collectionRef.current &&
+        !collectionRef.current.contains(event.target as Node)
+      ) {
+        setCollectionOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+
+    return () => document.removeEventListener("mousedown", onPointerDown);
+  }, []);
+
+  useEffect(() => {
+    const lock = menuOpen || searchOpen;
+    document.body.style.overflow = lock ? "hidden" : "";
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "";
     };
-  }, [shopOpen]);*/
+  }, [menuOpen, searchOpen]);
+
+  const navClass = (href: string) =>
+    cn(
+      "saaq-transition font-sans text-[10px] uppercase tracking-[0.22em] xl:text-[11px]",
+      pathname === href
+        ? "text-saaq-gold"
+        : "text-saaq-ivory/85 hover:text-saaq-gold"
+    );
 
   return (
-    <header className="fixed left-0 top-0 z-50 w-full">
-      {/* =========================================================
-          ANNOUNCEMENT BAR
-      ========================================================= */}
-
-      <div className="flex h-8 items-center justify-center bg-[#080808] px-4">
-        <p className="font-['Inter',sans-serif] text-[9px] font-medium uppercase tracking-[0.25em] text-[#d4af37] sm:text-[10px]">
-          FREE DELIVERY ACROSS UAE | EXPERIENCE THE ART OF FRAGRANCE
-        </p>
-      </div>
-
-      {/* =========================================================
-          MAIN NAVIGATION
-      ========================================================= */}
-
-      <nav className="relative flex h-[82px] items-center justify-between border-b border-white/10 bg-black/85 px-5 backdrop-blur-xl sm:px-8 lg:px-12">
-        {/* =======================================================
-            LEFT SIDE
-        ======================================================= */}
-
-        <div className="flex items-center">
-          {/* Mobile Menu Button */}
-
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen((previous) => !previous);
-              setShopOpen(false);
-            }}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={menuOpen}
-            className="flex h-10 w-10 items-center justify-center text-white transition-colors duration-300 hover:text-[#d4af37] lg:hidden"
+    <>
+      <header className="fixed left-0 top-0 z-50 w-full">
+        <AnnouncementBar />
+        <nav
+          className={cn(
+            "saaq-transition relative flex h-20 items-center justify-between px-5 sm:px-8 lg:px-10 xl:px-12",
+            isTransparent
+              ? "border-b border-transparent bg-transparent"
+              : "border-b border-saaq-gold/20 bg-saaq-black/92 backdrop-blur-xl"
+          )}
+        >
+          <Link
+            href="/"
+            onClick={closeMenus}
+            aria-label="SAAQ Perfume Home"
+            className="group relative z-20 flex shrink-0 items-center"
           >
-            {menuOpen ? (
-              <X size={23} strokeWidth={1.4} />
-            ) : (
-              <Menu size={23} strokeWidth={1.4} />
-            )}
-          </button>
+            <LogoMark />
+            <span className="ml-3 hidden font-display text-lg tracking-[0.35em] text-saaq-ivory xl:inline">
+              SAAQ
+            </span>
+          </Link>
 
-          {/* =====================================================
-              DESKTOP NAVIGATION
-          ===================================================== */}
-
-          <div className="hidden items-center gap-8 lg:flex">
-            {/* HOME */}
-
-            <Link
-              href="/"
-              onClick={closeMenus}
-              className="font-['Inter',sans-serif] text-[11px] uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:text-[#d4af37]"
-            >
+          <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-5 lg:flex xl:gap-8">
+            <Link href="/" onClick={closeMenus} className={navClass("/")}>
               Home
             </Link>
 
-            {/* =================================================
-                SHOP + MEGA MENU
-            ================================================= */}
-
             <div
-              ref={shopMenuRef}
+              ref={collectionRef}
               className="relative"
+              onMouseEnter={() => {
+                cancelClose();
+                setCollectionOpen(true);
+              }}
+              onMouseLeave={scheduleClose}
             >
-            {/* SHOP */}
-
-<Link
-  href="/shop"
-  onClick={closeMenus}
-  className="font-['Inter',sans-serif] text-[11px] uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:text-[#d4af37]"
->
-  Shop
-</Link>
-
-              {/* =================================================
-                  FULL WIDTH LUXURY MEGA MENU
-              ================================================= */}
+              <button
+                type="button"
+                aria-expanded={collectionOpen}
+                aria-haspopup="true"
+                onClick={() => setCollectionOpen((open) => !open)}
+                className={cn(
+                  "saaq-transition flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-[0.22em] xl:text-[11px]",
+                  collectionOpen || pathname.startsWith("/collection")
+                    ? "text-saaq-gold"
+                    : "text-saaq-ivory/85 hover:text-saaq-gold"
+                )}
+              >
+                Collection
+                <ChevronDown
+                  size={13}
+                  strokeWidth={1.4}
+                  className={cn(
+                    "saaq-transition",
+                    collectionOpen ? "rotate-180 text-saaq-gold" : ""
+                  )}
+                />
+              </button>
 
               <div
-                className={`fixed left-0 top-[114px] z-[100] w-screen border-b border-[#d4af37]/20 bg-[#080808]/98 shadow-[0_20px_50px_rgba(0,0,0,0.55)] backdrop-blur-2xl transition-all duration-500 ${
-                  shopOpen
+                className={cn(
+                  "saaq-transition absolute left-1/2 top-[calc(100%+1.25rem)] z-[60] w-[min(92vw,34rem)] -translate-x-1/2 border border-saaq-gold/20 bg-saaq-black/96 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl",
+                  collectionOpen
                     ? "visible translate-y-0 opacity-100"
-                    : "invisible -translate-y-4 opacity-0"
-                }`}
+                    : "invisible -translate-y-2 pointer-events-none opacity-0"
+                )}
               >
-                <div className="mx-auto max-w-[1500px] px-6 py-8 sm:px-10 lg:px-16">
-                  {/* =================================================
-                      MENU HEADING
-                  ================================================= */}
+                <p className="saaq-eyebrow">Collection</p>
+                <div className="saaq-rule mt-4" />
 
-                  <div className="mb-7 flex items-end justify-between border-b border-white/10 pb-5">
-                    <div>
-                      <p className="mb-2 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.35em] text-[#d4af37]">
-                        Discover SAAQ
-                      </p>
-
-                      <h2 className="font-['Playfair_Display',serif] text-2xl text-white sm:text-3xl">
-                        The Art of Fragrance
-                      </h2>
-                    </div>
-
-                    {/* View All */}
+                <div className="mt-6 grid grid-cols-[1fr_auto] gap-6">
+                  <div className="flex flex-col gap-4">
+                    {COLLECTION_LINKS.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMenus}
+                        className="saaq-transition font-sans text-[11px] uppercase tracking-[0.22em] text-saaq-ivory/75 hover:text-saaq-gold"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
 
                     <Link
-                      href="/shop"
+                      href="/collection"
                       onClick={closeMenus}
-                      className="group hidden items-center gap-2 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.25em] text-white/70 transition-colors hover:text-[#d4af37] sm:flex"
+                      className="saaq-transition mt-2 font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-gold hover:text-saaq-ivory"
                     >
-                      View All Fragrances
-
-                      <ArrowUpRight
-                        size={14}
-                        strokeWidth={1.4}
-                        className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                      />
+                      View All Collections
                     </Link>
                   </div>
 
-                  {/* =================================================
-                      COLLECTION CARDS
-                  ================================================= */}
-
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:gap-7">
-                    {/* =================================================
-                        TAKE OFF
-                    ================================================= */}
-
-                    <Link
-                      href="/shop?collection=takeoff"
-                      onClick={closeMenus}
-                      className="group relative overflow-hidden"
-                    >
-                      <div className="relative aspect-[16/7] overflow-hidden bg-[#111]">
-                        <Image
-                          src="/images/collections/takeoff.jpg"
-                          alt="SAAQ Take Off Collection"
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 700px"
-                          className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                        />
-
-                        {/* Dark Overlay */}
-
-                        <div className="absolute inset-0 bg-black/35 transition-colors duration-500 group-hover:bg-black/20" />
-
-                        {/* Bottom Gradient */}
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-
-                        {/* Text */}
-
-                        <div className="absolute bottom-0 left-0 p-5 sm:p-7">
-                          <p className="mb-1 font-['Inter',sans-serif] text-[8px] uppercase tracking-[0.3em] text-[#d4af37]">
-                            Collection 01
-                          </p>
-
-                          <h3 className="font-['Playfair_Display',serif] text-2xl text-white sm:text-3xl lg:text-4xl">
-                            Take Off
-                          </h3>
-
-                          <div className="mt-3 flex items-center gap-2 font-['Inter',sans-serif] text-[8px] uppercase tracking-[0.25em] text-white/80">
-                            Explore Collection
-
-                            <ArrowUpRight
-                              size={13}
-                              strokeWidth={1.3}
-                              className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-
-                    {/* =================================================
-                        GEMS
-                    ================================================= */}
-
-                    <Link
-                      href="/shop?collection=gems"
-                      onClick={closeMenus}
-                      className="group relative overflow-hidden"
-                    >
-                      <div className="relative aspect-[16/7] overflow-hidden bg-[#111]">
-                        <Image
-                          src="/images/collections/gems.jpg"
-                          alt="SAAQ Gems Collection"
-                          fill
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 700px"
-                          className="object-cover transition-transform duration-1000 group-hover:scale-105"
-                        />
-
-                        {/* Dark Overlay */}
-
-                        <div className="absolute inset-0 bg-black/35 transition-colors duration-500 group-hover:bg-black/20" />
-
-                        {/* Bottom Gradient */}
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-
-                        {/* Text */}
-
-                        <div className="absolute bottom-0 left-0 p-5 sm:p-7">
-                          <p className="mb-1 font-['Inter',sans-serif] text-[8px] uppercase tracking-[0.3em] text-[#d4af37]">
-                            Collection 02
-                          </p>
-
-                          <h3 className="font-['Playfair_Display',serif] text-2xl text-white sm:text-3xl lg:text-4xl">
-                            Gems
-                          </h3>
-
-                          <div className="mt-3 flex items-center gap-2 font-['Inter',sans-serif] text-[8px] uppercase tracking-[0.25em] text-white/80">
-                            Explore Collection
-
-                            <ArrowUpRight
-                              size={13}
-                              strokeWidth={1.3}
-                              className="transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  </div>
-
-                  {/* =================================================
-                      BOTTOM LINKS
-                  ================================================= */}
-
-                  <div className="mt-7 flex items-center justify-between border-t border-white/10 pt-5">
-                    <div className="flex gap-6">
+                  <div className="hidden w-48 grid-cols-1 gap-3 sm:grid">
+                    {COLLECTION_LINKS.map((item) => (
                       <Link
-                        href="/shop?collection=takeoff"
+                        key={`${item.href}-image`}
+                        href={item.href}
                         onClick={closeMenus}
-                        className="font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.2em] text-white/60 transition-colors hover:text-[#d4af37]"
+                        className="group relative block aspect-[16/9] overflow-hidden bg-saaq-charcoal"
                       >
-                        Take Off
+                        <Image
+                          src={item.image}
+                          alt={item.label}
+                          fill
+                          unoptimized
+                          sizes="192px"
+                          className="object-cover object-[center_right] saaq-img-zoom"
+                        />
                       </Link>
-
-                      <Link
-                        href="/shop?collection=gems"
-                        onClick={closeMenus}
-                        className="font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.2em] text-white/60 transition-colors hover:text-[#d4af37]"
-                      >
-                        Gems
-                      </Link>
-                    </div>
-
-                    {/* Mobile View All */}
-
-                    <Link
-                      href="/shop"
-                      onClick={closeMenus}
-                      className="font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.2em] text-[#d4af37] transition-opacity hover:opacity-70 sm:hidden"
-                    >
-                      View All
-                    </Link>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* OUR STORY */}
-
-            <Link
-              href="/about"
-              onClick={closeMenus}
-              className="font-['Inter',sans-serif] text-[11px] uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:text-[#d4af37]"
-            >
-              Our Story
-            </Link>
-
-            {/* CONTACT */}
-
-            <Link
-              href="/contact"
-              onClick={closeMenus}
-              className="font-['Inter',sans-serif] text-[11px] uppercase tracking-[0.2em] text-white transition-colors duration-300 hover:text-[#d4af37]"
-            >
-              Contact
-            </Link>
+            {NAV_LINKS.filter((link) => link.href !== "/").map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={closeMenus}
+                className={navClass(link.href)}
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
-        </div>
 
-        {/* =======================================================
-            CENTER LOGO
-        ======================================================= */}
-
-        <Link
-          href="/"
-          onClick={closeMenus}
-          aria-label="SAAQ Perfume Home"
-          className="group absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
-        >
-          <div className="relative flex h-[70px] w-[70px] items-center justify-center">
-            {/* Outer Ring */}
-
-            <div className="absolute inset-0 rounded-full border border-[#d4af37]/35 transition-all duration-700 group-hover:rotate-180 group-hover:border-[#d4af37]/80 group-hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]" />
-
-            {/* Top Diamond */}
-
-            <span className="absolute -top-[2px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 rotate-45 bg-[#d4af37] shadow-[0_0_10px_rgba(212,175,55,0.8)]" />
-
-            {/* Bottom Diamond */}
-
-            <span className="absolute -bottom-[2px] left-1/2 h-[5px] w-[5px] -translate-x-1/2 rotate-45 bg-[#d4af37]/70" />
-
-            {/* Inner Ring */}
-
-            <div className="absolute h-[62px] w-[62px] rounded-full border border-[#d4af37]/25 transition-all duration-500 group-hover:scale-105" />
-
-            {/* Logo Image */}
-
-            <div className="relative h-[54px] w-[54px] overflow-hidden rounded-full border border-[#d4af37]/70 bg-black shadow-[0_5px_25px_rgba(0,0,0,0.7)] transition-all duration-500 group-hover:scale-105">
-              <Image
-                src="/images/logo/saaq-logo.jpeg"
-                alt="SAAQ Perfume"
-                fill
-                priority
-                sizes="54px"
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-
-              {/* Shine */}
-
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-transparent via-white/15 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-            </div>
-          </div>
-        </Link>
-
-        {/* =======================================================
-            RIGHT SIDE - CART
-        ======================================================= */}
-
-        <Link
-          href="/cart"
-          onClick={closeMenus}
-          aria-label="Shopping cart"
-          className="group ml-auto flex h-10 items-center gap-2 text-white transition-colors duration-300 hover:text-[#d4af37]"
-        >
-          <span className="hidden font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.2em] sm:block">
-            Cart
-          </span>
-
-          <div className="relative">
-            <ShoppingBag
-              size={21}
-              strokeWidth={1.4}
-              className="transition-transform duration-300 group-hover:scale-110"
-            />
-
-            {/* Cart Count */}
-
-            <span className="absolute -right-2.5 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d4af37] px-1 text-[8px] font-semibold text-black">
-              0
-            </span>
-          </div>
-        </Link>
-      </nav>
-
-      {/* =========================================================
-          MOBILE MENU
-      ========================================================= */}
-
-      <div
-        className={`absolute left-0 top-[114px] w-full overflow-hidden bg-[#080808]/98 backdrop-blur-2xl transition-all duration-500 lg:hidden ${
-          menuOpen
-            ? "max-h-[600px] border-b border-[#d4af37]/20 opacity-100"
-            : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="px-7 py-6">
-          {/* HOME */}
-
-          <MobileNavLink
-            href="/"
-            label="Home"
-            onClick={closeMenus}
-          />
-
-          {/* =====================================================
-              MOBILE SHOP
-          ===================================================== */}
-
-          <div className="border-b border-white/10">
+          <div className="relative z-20 ml-auto flex items-center gap-1 sm:gap-2">
             <button
               type="button"
-              onClick={() => setShopOpen((previous) => !previous)}
-              className="flex w-full items-center justify-between py-5 font-['Inter',sans-serif] text-[11px] uppercase tracking-[0.25em] text-white transition-colors hover:text-[#d4af37]"
-              aria-expanded={shopOpen}
+              aria-label="Search"
+              aria-expanded={searchOpen}
+              aria-haspopup="dialog"
+              onClick={() => {
+                closeMenus();
+                setSearchOpen(true);
+              }}
+              className="saaq-transition flex h-10 w-10 items-center justify-center text-saaq-ivory hover:text-saaq-gold"
             >
-              <span>Shop</span>
-
-              <ChevronDown
-                size={15}
-                strokeWidth={1.4}
-                className={`transition-transform duration-300 ${
-                  shopOpen
-                    ? "rotate-180 text-[#d4af37]"
-                    : ""
-                }`}
-              />
+              <Search size={18} strokeWidth={1.4} />
             </button>
 
-            {/* Mobile Collections */}
-
-            <div
-              className={`overflow-hidden transition-all duration-500 ${
-                shopOpen
-                  ? "max-h-[180px] pb-3 opacity-100"
-                  : "max-h-0 opacity-0"
-              }`}
+            <Link
+              href="/wishlist"
+              onClick={closeMenus}
+              aria-label={`Wishlist, ${wishlistCount} saved`}
+              className="saaq-transition group relative flex h-10 w-10 items-center justify-center text-saaq-ivory hover:text-saaq-gold"
             >
-              {/* All Fragrances */}
+              <Heart size={18} strokeWidth={1.4} />
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center bg-saaq-gold px-1 font-sans text-[8px] font-semibold text-saaq-black">
+                {wishlistCount}
+              </span>
+            </Link>
 
-              <Link
-                href="/shop"
-                onClick={closeMenus}
-                className="flex items-center justify-between py-3 pl-4 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.22em] text-white/60 transition-colors hover:text-[#d4af37]"
-              >
-                All Fragrances
+            <button
+              type="button"
+              aria-label={`Shopping cart, ${itemCount} items`}
+              onClick={() => {
+                closeMenus();
+                openDrawer();
+              }}
+              className="saaq-transition group relative flex h-10 w-10 items-center justify-center text-saaq-ivory hover:text-saaq-gold"
+            >
+              <ShoppingBag size={18} strokeWidth={1.4} />
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center bg-saaq-gold px-1 font-sans text-[8px] font-semibold text-saaq-black">
+                {itemCount}
+              </span>
+            </button>
 
-                <ArrowUpRight
-                  size={13}
-                  strokeWidth={1.3}
-                />
-              </Link>
-
-              {/* Take Off */}
-
-              <Link
-                href="/shop?collection=takeoff"
-                onClick={closeMenus}
-                className="flex items-center justify-between py-3 pl-4 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.22em] text-white/60 transition-colors hover:text-[#d4af37]"
-              >
-                Take Off
-
-                <ArrowUpRight
-                  size={13}
-                  strokeWidth={1.3}
-                />
-              </Link>
-
-              {/* Gems */}
-
-              <Link
-                href="/shop?collection=gems"
-                onClick={closeMenus}
-                className="flex items-center justify-between py-3 pl-4 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.22em] text-white/60 transition-colors hover:text-[#d4af37]"
-              >
-                Gems
-
-                <ArrowUpRight
-                  size={13}
-                  strokeWidth={1.3}
-                />
-              </Link>
-            </div>
+            <button
+              type="button"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              onClick={() => {
+                setSearchOpen(false);
+                setCollectionOpen(false);
+                setMenuOpen((open) => !open);
+              }}
+              className="saaq-transition flex h-10 w-10 items-center justify-center text-saaq-ivory hover:text-saaq-gold lg:hidden"
+            >
+              {menuOpen ? (
+                <X size={22} strokeWidth={1.4} />
+              ) : (
+                <Menu size={22} strokeWidth={1.4} />
+              )}
+            </button>
           </div>
+        </nav>
 
-          {/* OUR STORY */}
+        <div
+          className={cn(
+            "saaq-transition fixed inset-x-0 top-[calc(var(--saaq-announce-height)+5rem)] z-40 h-[calc(100vh-var(--saaq-header-offset))] overflow-y-auto bg-saaq-black/98 lg:hidden",
+            menuOpen
+              ? "visible opacity-100"
+              : "invisible pointer-events-none opacity-0"
+          )}
+        >
+          <div className="flex flex-col px-7 py-8">
+            <MobileLink href="/" label="Home" onClick={closeMenus} active={pathname === "/"} />
 
-          <MobileNavLink
-            href="/about"
-            label="Our Story"
-            onClick={closeMenus}
-          />
+            <div className="border-b border-white/10">
+              <button
+                type="button"
+                aria-expanded={collectionOpen}
+                onClick={() => setCollectionOpen((open) => !open)}
+                className="flex w-full items-center justify-between py-5 font-sans text-[11px] uppercase tracking-[0.25em] text-saaq-ivory"
+              >
+                Collection
+                <ChevronDown
+                  size={15}
+                  className={cn(
+                    "saaq-transition",
+                    collectionOpen ? "rotate-180 text-saaq-gold" : ""
+                  )}
+                />
+              </button>
 
-          {/* CONTACT */}
+              <div
+                className={cn(
+                  "saaq-transition overflow-hidden",
+                  collectionOpen ? "max-h-64 pb-4 opacity-100" : "max-h-0 opacity-0"
+                )}
+              >
+                {COLLECTION_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={closeMenus}
+                    className="block py-2.5 pl-4 font-sans text-[10px] uppercase tracking-[0.22em] text-saaq-ivory/55 hover:text-saaq-gold"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <Link
+                  href="/collection"
+                  onClick={closeMenus}
+                  className="block py-2.5 pl-4 font-sans text-[10px] uppercase tracking-[0.22em] text-saaq-gold"
+                >
+                  View All Collections
+                </Link>
+              </div>
+            </div>
 
-          <MobileNavLink
-            href="/contact"
-            label="Contact"
-            onClick={closeMenus}
-          />
-
-          {/* CART */}
-
-          <MobileNavLink
-            href="/cart"
-            label="Cart"
-            onClick={closeMenus}
-          />
-
-          {/* Mobile Footer */}
-
-          <div className="pt-6">
-            <p className="font-['Inter',sans-serif] text-[8px] uppercase tracking-[0.3em] text-[#d4af37]/70">
-              The Art of Signature Fragrance
-            </p>
+            {NAV_LINKS.filter((link) => link.href !== "/").map((link) => (
+              <MobileLink
+                key={link.href}
+                href={link.href}
+                label={link.label}
+                onClick={closeMenus}
+                active={pathname === link.href}
+              />
+            ))}
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+    </>
   );
 }
 
-/* =============================================================
-   MOBILE NAVIGATION LINK
-============================================================= */
+function LogoMark() {
+  return (
+    <div className="relative flex h-12 w-12 items-center justify-center">
+      <div className="saaq-transition absolute inset-0 rounded-full border border-saaq-gold/40 group-hover:border-saaq-gold" />
+      <div className="relative h-10 w-10 overflow-hidden rounded-full border border-saaq-gold/70 bg-saaq-black">
+        <Image
+          src="/images/logo/saaq-logo.jpeg"
+          alt=""
+          fill
+          priority
+          sizes="40px"
+          className="object-cover"
+        />
+      </div>
+    </div>
+  );
+}
 
-function MobileNavLink({
+function MobileLink({
   href,
   label,
   onClick,
+  active,
 }: {
   href: string;
   label: string;
   onClick: () => void;
+  active: boolean;
 }) {
   return (
     <Link
       href={href}
       onClick={onClick}
-      className="flex items-center justify-between border-b border-white/10 py-5 font-['Inter',sans-serif] text-[11px] uppercase tracking-[0.25em] text-white transition-colors duration-300 hover:text-[#d4af37]"
+      className={cn(
+        "border-b border-white/10 py-5 font-sans text-[11px] uppercase tracking-[0.25em]",
+        active ? "text-saaq-gold" : "text-saaq-ivory"
+      )}
     >
       {label}
-
-      <ArrowUpRight
-        size={14}
-        strokeWidth={1.3}
-        className="opacity-40"
-      />
     </Link>
   );
 }

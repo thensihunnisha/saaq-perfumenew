@@ -6,8 +6,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Minus, Plus, ShoppingBag } from "lucide-react";
 import { useState } from "react";
-
-const PHONE_NUMBER = "971542549557";
+import { getProductWhatsAppUrl } from "@/lib/whatsapp";
 
 type Product = {
   id: number;
@@ -123,7 +122,7 @@ export default function ProductDetailsPage() {
 
   if (!product) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#080808] px-6 text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#080808] px-6 text-white">
         <div className="text-center">
           <p className="mb-3 text-[10px] uppercase tracking-[0.4em] text-[#d4af37]">
             SAAQ PERFUME
@@ -145,23 +144,23 @@ export default function ProductDetailsPage() {
             Back to Shop
           </Link>
         </div>
-      </main>
+      </div>
     );
   }
 
   const collectionName =
     product.collection === "takeoff" ? "Take Off Collection" : "Gems Collection";
 
-  const whatsappMessage = encodeURIComponent(
-    `Hello, I would like to order:\n\n${product.name}\nQuantity: ${quantity}\nPrice: AED ${product.price.toFixed(
-      2
-    )}\nTotal: AED ${(product.price * quantity).toFixed(2)}`
-  );
-
-  const whatsappUrl = `https://wa.me/${PHONE_NUMBER}?text=${whatsappMessage}`;
+  const whatsappUrl = getProductWhatsAppUrl({
+    name: product.name,
+    collection: product.collection,
+    category: product.category,
+    quantity,
+    price: product.price,
+  });
 
   return (
-    <main className="min-h-screen bg-[#080808] pt-[114px] text-white">
+    <div className="min-h-screen bg-[#080808] pt-[114px] text-white">
       {/* BACK TO SHOP */}
       <div className="mx-auto max-w-7xl px-6 pt-8">
         <Link
@@ -382,7 +381,7 @@ export default function ProductDetailsPage() {
           Explore {product.collection === "takeoff" ? "Take Off" : "Gems"}
         </Link>
       </section>
-    </main>
+    </div>
   );
 }
 

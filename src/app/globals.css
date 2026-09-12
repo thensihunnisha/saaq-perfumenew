@@ -1,14 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
-
 @import "tailwindcss";
+
+/* --------------------------------------------------------------------------
+   SAAQ design tokens (Tailwind v4 theme)
+   -------------------------------------------------------------------------- */
+
+@theme {
+  --color-saaq-black: #080808;
+  --color-saaq-void: #050505;
+  --color-saaq-charcoal: #141414;
+  --color-saaq-ink: #1c1c1c;
+  --color-saaq-ivory: #f3ede3;
+  --color-saaq-cream: #ece4d6;
+  --color-saaq-beige: #d9cfc0;
+  --color-saaq-gold: #c4a574;
+  --color-saaq-gold-deep: #a89068;
+  --color-saaq-gold-line: color-mix(in srgb, #c4a574 38%, transparent);
+
+  --font-sans: var(--font-saaq-sans), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: var(--font-saaq-display), Georgia, "Times New Roman", serif;
+
+  --ease-saaq: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-saaq: 700ms;
+}
 
 :root {
   --saaq-black: #080808;
-  --saaq-charcoal: #111111;
-  --saaq-gold: #d4af37;
-  --saaq-gold-dark: #a07f3c;
-  --saaq-cream: #f8f3ea;
-  --saaq-white: #ffffff;
+  --saaq-void: #050505;
+  --saaq-charcoal: #141414;
+  --saaq-ivory: #f3ede3;
+  --saaq-cream: #ece4d6;
+  --saaq-beige: #d9cfc0;
+  --saaq-gold: #c4a574;
+  --saaq-gold-deep: #a89068;
+  --saaq-announce-height: 36px;
+  --saaq-header-offset: calc(var(--saaq-announce-height) + 80px);
+  --saaq-max: 90rem;
 }
 
 * {
@@ -19,18 +45,476 @@ html {
   scroll-behavior: smooth;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   margin: 0;
   background: var(--saaq-black);
-  color: var(--saaq-white);
-  font-family: "Inter", sans-serif;
+  color: var(--saaq-ivory);
+  font-family: var(--font-sans);
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.font-display {
-  font-family: "Playfair Display", serif;
+::selection {
+  background: color-mix(in srgb, var(--saaq-gold) 35%, transparent);
+  color: var(--saaq-ivory);
+}
+
+:focus-visible {
+  outline: 1px solid var(--saaq-gold);
+  outline-offset: 3px;
 }
 
 button,
 a {
   -webkit-tap-highlight-color: transparent;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+/* Keep existing arbitrary font classes tied to loaded faces */
+[class*="Playfair_Display"],
+.font-display {
+  font-family: var(--font-display);
+}
+
+[class*="font-['Inter"] {
+  font-family: var(--font-sans);
+}
+
+/* --------------------------------------------------------------------------
+   Type hierarchy
+   -------------------------------------------------------------------------- */
+
+.saaq-eyebrow {
+  font-family: var(--font-sans);
+  font-size: clamp(0.5625rem, 0.2vw + 0.5rem, 0.625rem);
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--saaq-gold);
+}
+
+.saaq-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  color: var(--saaq-ivory);
+  font-size: clamp(2.25rem, 6vw + 0.5rem, 5.5rem);
+}
+
+.saaq-h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  color: var(--saaq-ivory);
+  font-size: clamp(2rem, 4.2vw + 0.6rem, 3.75rem);
+}
+
+.saaq-h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--saaq-ivory);
+  font-size: clamp(1.625rem, 2.8vw + 0.6rem, 2.75rem);
+}
+
+.saaq-h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.25;
+  color: var(--saaq-ivory);
+  font-size: clamp(1.25rem, 1.4vw + 0.8rem, 1.75rem);
+}
+
+.saaq-body {
+  font-family: var(--font-sans);
+  font-size: clamp(0.8125rem, 0.25vw + 0.75rem, 0.9375rem);
+  line-height: 1.8;
+  color: color-mix(in srgb, var(--saaq-ivory) 55%, transparent);
+}
+
+.saaq-meta {
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--saaq-ivory) 40%, transparent);
+}
+
+/* --------------------------------------------------------------------------
+   Layout
+   -------------------------------------------------------------------------- */
+
+.saaq-container {
+  width: 100%;
+  max-width: var(--saaq-max);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+.saaq-section {
+  padding-block: clamp(3.5rem, 8vw, 7.5rem);
+}
+
+.saaq-page {
+  min-height: 100vh;
+  padding-top: var(--saaq-header-offset);
+  background: var(--saaq-black);
+  color: var(--saaq-ivory);
+}
+
+.saaq-rule {
+  height: 1px;
+  width: 3.5rem;
+  background: var(--saaq-gold);
+  border: 0;
+}
+
+.saaq-rule-wide {
+  height: 1px;
+  width: 100%;
+  border: 0;
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--saaq-gold) 55%, transparent),
+    transparent
+  );
+}
+
+.saaq-frame {
+  position: relative;
+  overflow: hidden;
+  background: var(--saaq-charcoal);
+}
+
+.saaq-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--saaq-gold) 22%, transparent);
+}
+
+.saaq-transition {
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+  transition-duration: var(--duration-saaq);
+  transition-timing-function: var(--ease-saaq);
+}
+
+.saaq-btn {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.saaq-btn:hover {
+  transform: translate3d(0, -1px, 0);
+}
+
+.saaq-img-zoom {
+  transform: scale(1);
+  transition: transform 1.2s var(--ease-saaq);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .group:hover .saaq-img-zoom {
+    transform: scale(1.05);
+  }
+}
+
+@media (min-width: 390px) {
+  .saaq-container {
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .saaq-container {
+    padding-inline: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .saaq-container {
+    padding-inline: 3rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .saaq-container {
+    padding-inline: 4rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .saaq-container {
+    padding-inline: 5rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Hero cinema
+   -------------------------------------------------------------------------- */
+
+@keyframes saaq-hero-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes saaq-hero-ken {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(0, -1.2%, 0);
+  }
+}
+
+@keyframes saaq-hero-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes saaq-hero-mist {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: translate3d(0, 8%, 0) scale(1);
+  }
+  50% {
+    opacity: 0.38;
+    transform: translate3d(4%, -2%, 0) scale(1.08);
+  }
+}
+
+@keyframes saaq-hero-orb {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(12px, -20px, 0);
+    opacity: 0.55;
+  }
+}
+
+@keyframes saaq-hero-scroll {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+
+.saaq-hero-rise {
+  animation: saaq-hero-rise 1.15s var(--ease-saaq) both;
+}
+
+.saaq-hero-delay-1 {
+  animation-delay: 0.12s;
+}
+
+.saaq-hero-delay-2 {
+  animation-delay: 0.22s;
+}
+
+.saaq-hero-delay-3 {
+  animation-delay: 0.32s;
+}
+
+.saaq-hero-delay-4 {
+  animation-delay: 0.44s;
+}
+
+.saaq-hero-scroll-icon {
+  animation: saaq-hero-scroll 2.2s ease-in-out infinite;
+}
+
+.saaq-hero-media {
+  animation: saaq-hero-ken 36s ease-in-out infinite alternate;
+}
+
+.saaq-hero-float {
+  animation: saaq-hero-float 7s var(--ease-saaq) infinite;
+}
+
+.saaq-hero-mist {
+  animation: saaq-hero-mist 14s var(--ease-saaq) infinite;
+}
+
+.saaq-hero-orb {
+  animation: saaq-hero-orb 11s var(--ease-saaq) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .saaq-hero-rise,
+  .saaq-hero-media,
+  .saaq-hero-float,
+  .saaq-hero-mist,
+  .saaq-hero-orb,
+  .saaq-hero-scroll-icon {
+    animation: none;
+  }
+}
+
+.saaq-reveal {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition:
+    opacity 0.85s var(--ease-saaq),
+    transform 0.85s var(--ease-saaq),
+    clip-path 1.15s var(--ease-saaq);
+  transition-delay: var(--saaq-reveal-delay, 0ms);
+}
+
+.saaq-reveal[data-reveal="fade"] {
+  transform: none;
+}
+
+.saaq-reveal[data-reveal="left"] {
+  transform: translate3d(-28px, 0, 0);
+}
+
+.saaq-reveal[data-reveal="right"] {
+  transform: translate3d(28px, 0, 0);
+}
+
+.saaq-reveal[data-reveal="scale"] {
+  transform: scale(0.97);
+}
+
+.saaq-reveal[data-reveal="image"] {
+  overflow: hidden;
+  opacity: 1;
+  transform: none;
+  clip-path: inset(10% 8% 10% 8%);
+}
+
+.saaq-reveal[data-reveal="image"] .saaq-img-zoom,
+.saaq-reveal[data-reveal="image"] img {
+  transform: scale(1.08);
+  transition: transform 1.45s var(--ease-saaq);
+}
+
+.saaq-reveal.is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+  clip-path: inset(0);
+}
+
+.saaq-reveal[data-reveal="image"].is-visible .saaq-img-zoom,
+.saaq-reveal[data-reveal="image"].is-visible img {
+  transform: scale(1);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .group:hover .saaq-reveal[data-reveal="image"].is-visible .saaq-img-zoom,
+  .group:hover .saaq-reveal[data-reveal="image"].is-visible img {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes saaq-page-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.saaq-page-enter {
+  animation: saaq-page-enter 0.48s var(--ease-saaq) both;
+}
+
+@keyframes saaq-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.saaq-overlay-in {
+  animation: saaq-overlay-in 0.35s var(--ease-saaq) both;
+}
+
+@keyframes saaq-announce-marquee {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.saaq-announce-track {
+  display: flex;
+  width: max-content;
+  animation: saaq-announce-marquee 32s linear infinite;
+}
+
+.saaq-announce:hover .saaq-announce-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .saaq-reveal {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+    transition: none;
+  }
+
+  .saaq-reveal[data-reveal="image"] .saaq-img-zoom,
+  .saaq-reveal[data-reveal="image"] img,
+  .saaq-reveal[data-reveal="image"].is-visible .saaq-img-zoom,
+  .saaq-reveal[data-reveal="image"].is-visible img,
+  .saaq-img-zoom,
+  .group:hover .saaq-img-zoom {
+    transform: none;
+    transition: none;
+  }
+
+  .saaq-page-enter,
+  .saaq-overlay-in,
+  .saaq-announce-track,
+  .saaq-btn:hover {
+    animation: none;
+    transform: none;
+    letter-spacing: inherit;
+  }
 }

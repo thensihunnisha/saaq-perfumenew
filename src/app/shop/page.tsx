@@ -5,11 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { MessageCircle } from "lucide-react";
-
-// TODO: replace with your actual WhatsApp business number
-// Format: countrycode + number, no +, spaces, or leading zeros
-// e.g. UAE +971 50 123 4567 -> "971501234567"
-const WHATSAPP_NUMBER = "971501234567";
+import { getProductWhatsAppUrl } from "@/lib/whatsapp";
 
 type Product = {
   id: number;
@@ -145,27 +141,27 @@ function ShopContent() {
   /*
    * BUILD A WHATSAPP ORDER LINK FOR A PRODUCT
    */
-  const getWhatsAppLink = (product: Product) => {
-    const message = `Hello! I'd like to order:\n\n*${product.name}*\nPrice: AED ${product.price.toFixed(
-      2
-    )}\n\nPlease confirm availability.`;
-
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-      message
-    )}`;
-  };
+  const getWhatsAppLink = (product: Product) =>
+    getProductWhatsAppUrl({
+      name: product.name,
+      collection: product.collection,
+      category:
+        product.collection === "takeoff" ? "Take Off" : "Gems",
+      quantity: 1,
+      price: product.price,
+    });
 
   return (
-    <main className="min-h-screen bg-[#080808] pt-[114px] text-white">
+    <div className="min-h-screen bg-[#080808] pt-[114px] text-white">
       {/* HERO */}
       <section className="relative flex min-h-[300px] items-center justify-center overflow-hidden">
         <Image
           src={
             selectedCollection === "takeoff"
-              ? "/images/collections/takeoff.jpg"
+              ? "/images/collections/takeoff-home.jpg"
               : selectedCollection === "gems"
-                ? "/images/collections/gems.jpg"
-                : "/images/collections/all.jpg"
+                ? "/images/collections/gems-home.jpg"
+                : "/images/collections/allcollection.jpg"
           }
           alt={pageTitle}
           fill
@@ -317,7 +313,7 @@ function ShopContent() {
           </div>
         )}
       </section>
-    </main>
+    </div>
   );
 }
 

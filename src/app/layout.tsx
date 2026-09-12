@@ -1,7 +1,23 @@
 import type { Metadata } from "next";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import PageTransition from "@/components/PageTransition";
+import Providers from "@/components/Providers";
+
+const saaqSans = Inter({
+  subsets: ["latin"],
+  variable: "--font-saaq-sans",
+  display: "swap",
+});
+
+const saaqDisplay = Playfair_Display({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-saaq-display",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "SAAQ PERFUME | The Art of Signature Fragrance",
@@ -15,14 +31,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <Header />
-
-        <main>{children}</main>
-        <Footer/>
+    <html
+      lang="en"
+      data-scroll-behavior="smooth"
+      className={`${saaqSans.variable} ${saaqDisplay.variable}`}
+      suppressHydrationWarning
+    >
+      <body
+        className="bg-saaq-black font-sans text-saaq-ivory antialiased"
+        suppressHydrationWarning
+      >
+        <Providers>
+          <Header />
+          <main>
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <Footer />
+        </Providers>
       </body>
-     
     </html>
   );
 }
