@@ -1,12 +1,15 @@
+import Link from "next/link";
 import { getTakeOffOfferCopy, type TakeOffPromotionResult } from "@/lib/takeOffPromotion";
 import { cn } from "@/lib/cn";
 
 export default function TakeOffOfferNote({
   promotion,
   compact = false,
+  onNavigate,
 }: {
   promotion: TakeOffPromotionResult;
   compact?: boolean;
+  onNavigate?: () => void;
 }) {
   const copy = getTakeOffOfferCopy(promotion);
 
@@ -15,9 +18,12 @@ export default function TakeOffOfferNote({
   }
 
   return (
-    <div
+    <Link
+      href="/collection/takeoff"
+      onClick={onNavigate}
+      aria-label="Shop the Take Off collection"
       className={cn(
-        "border border-saaq-gold/25 bg-saaq-gold/5",
+        "block border border-saaq-gold/25 bg-saaq-gold/5 saaq-transition hover:border-saaq-gold/50",
         compact ? "px-4 py-3" : "px-5 py-4"
       )}
     >
@@ -42,6 +48,6 @@ export default function TakeOffOfferNote({
           {message}
         </p>
       ))}
-    </div>
+    </Link>
   );
 }

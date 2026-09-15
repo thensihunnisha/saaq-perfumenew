@@ -183,7 +183,11 @@ export default function CartDrawer() {
           <div className="border-t border-white/10 px-6 py-6">
             {promotion.takeOffQuantity > 0 ? (
               <div className="mb-4">
-                <TakeOffOfferNote promotion={promotion} compact />
+                <TakeOffOfferNote
+                  promotion={promotion}
+                  compact
+                  onNavigate={closeDrawer}
+                />
               </div>
             ) : null}
             {promotion.takeOffDiscount > 0 ? (

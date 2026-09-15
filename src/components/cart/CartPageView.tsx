@@ -95,10 +95,10 @@ export default function CartPageView() {
                 const lineTotal = takeOffLine
                   ? takeOffLine.payableLineTotal
                   : originalLineTotal;
-                const hasDiscount =
-                  Boolean(takeOffLine) &&
-                  takeOffLine.originalLineTotal - takeOffLine.payableLineTotal >
-                    0.009;
+                const hasDiscount = takeOffLine
+                  ? takeOffLine.originalLineTotal - takeOffLine.payableLineTotal >
+                    0.009
+                  : false;
 
                 return (
                   <li
