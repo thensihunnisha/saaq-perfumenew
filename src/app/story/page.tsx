@@ -65,7 +65,7 @@ export default function StoryPage() {
                     alt="Anwer Saadiq, Founder of SAAQ Perfume"
                     fill
                     sizes="(max-width: 1024px) 90vw, 420px"
-                    className="object-cover object-[center_18%]"
+                    className="object-cover object-center sm:object-[center_18%]"
                   />
                 </div>
               </div>
@@ -122,7 +122,7 @@ export default function StoryPage() {
           <Body className="mt-8 max-w-md">
             Discover the fragrance that becomes part of your story.
           </Body>
-          <ButtonLink href="/shop" className="mt-10" size="lg">
+          <ButtonLink href="/shop" className="mt-10 w-full text-center sm:w-auto" size="lg">
             Explore the Collection
           </ButtonLink>
         </Container>

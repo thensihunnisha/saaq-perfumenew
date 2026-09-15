@@ -6,6 +6,7 @@ export type CollectionWorldContent = {
   title: string;
   heroLine: string;
   heroImage: string;
+  heroVideo?: string;
   theme: "gems" | "takeoff";
   storyEyebrow: string;
   storyTitle: string;
@@ -43,6 +44,7 @@ export const takeOffWorld: CollectionWorldContent = {
   title: "Take Off",
   heroLine: "Created for movement, freedom, and modern adventure.",
   heroImage: "/images/collections/tkhero2.png",
+  heroVideo: "/images/collections/Pippit_0913_PerfumeHeroR3.clean.mp4",
   theme: "takeoff",
   storyEyebrow: "The Collection Story",
   storyTitle: "Arrive with intention.",

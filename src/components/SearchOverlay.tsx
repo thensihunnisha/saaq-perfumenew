@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
-import { searchProducts } from "@/data/products";
+import { searchProducts, type Product } from "@/data/products";
+import { getProductHref, getProducts } from "@/lib/api";
 
 type SearchOverlayProps = {
   open: boolean;
@@ -14,6 +15,8 @@ type SearchOverlayProps = {
 export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
+  const [catalog, setCatalog] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -33,6 +36,36 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
       return;
     }
 
+    let cancelled = false;
+    setIsLoading(true);
+
+    getProducts()
+      .then((items) => {
+        if (!cancelled) {
+          setCatalog(items);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCatalog([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -45,7 +78,10 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [onClose, open]);
 
-  const results = useMemo(() => searchProducts(query), [query]);
+  const results = useMemo(
+    () => searchProducts(catalog, query),
+    [catalog, query]
+  );
   const hasQuery = query.trim().length > 0;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -106,6 +142,10 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
             <p className="font-display text-2xl text-saaq-ivory/45 sm:text-3xl">
               Begin typing to find a signature scent.
             </p>
+          ) : isLoading ? (
+            <p className="font-display text-2xl text-saaq-ivory/45 sm:text-3xl">
+              Loading fragrances
+            </p>
           ) : results.length === 0 ? (
             <p className="font-display text-2xl text-saaq-ivory sm:text-3xl">
               No fragrances found
@@ -115,7 +155,7 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
               {results.map((product) => (
                 <li key={product.id}>
                   <Link
-                    href={`/product/${product.id}`}
+                    href={getProductHref(product.id)}
                     onClick={onClose}
                     className="saaq-transition group flex items-center gap-4 py-4 sm:gap-6 sm:py-5"
                   >

@@ -150,27 +150,23 @@ export function getFragranceStory(product: Product): string {
   return `${product.name} is a SAAQ composition from the ${collection} collection — created to be remembered. It opens with presence, settles into character, and leaves a quiet trail long after the room has emptied.`;
 }
 
-export function getRelatedProducts(product: Product, limit = 4): Product[] {
-  const remaining = products.filter((item) => item.id !== product.id);
+export function getRelatedProducts(
+  product: Product,
+  catalog: Product[],
+  limit = 4
+): Product[] {
+  const remaining = catalog.filter((item) => item.id !== product.id);
   const sameCollection = remaining.filter(
     (item) => item.collection === product.collection
   );
-  const sameGender = remaining.filter(
-    (item) =>
-      item.gender === product.gender &&
-      item.collection !== product.collection
-  );
-  const featured = remaining.filter(
-    (item) =>
-      item.featured &&
-      item.collection !== product.collection &&
-      item.gender !== product.gender
+  const others = remaining.filter(
+    (item) => item.collection !== product.collection
   );
 
-  return [...sameCollection, ...sameGender, ...featured].slice(0, limit);
+  return [...sameCollection, ...others].slice(0, limit);
 }
 
-export function searchProducts(query: string): Product[] {
+export function searchProducts(catalog: Product[], query: string): Product[] {
   const term = query.trim().toLowerCase();
 
   if (!term) {
@@ -179,7 +175,7 @@ export function searchProducts(query: string): Product[] {
 
   const tokens = term.split(/\s+/).filter(Boolean);
 
-  return products.filter((product) => {
+  return catalog.filter((product) => {
     const haystack = [
       product.name,
       product.category,
@@ -197,13 +193,14 @@ export function searchProducts(query: string): Product[] {
 }
 
 export function getProductsByCollection(
+  catalog: Product[],
   collection: CollectionSlug
 ): Product[] {
-  return products.filter((product) => product.collection === collection);
+  return catalog.filter((product) => product.collection === collection);
 }
 
-export function getProductsByGender(gender: Gender): Product[] {
-  return products.filter((product) => product.gender === gender);
+export function getProductsByGender(catalog: Product[], gender: Gender): Product[] {
+  return catalog.filter((product) => product.gender === gender);
 }
 
 export function filterAndSortProducts(
@@ -231,7 +228,12 @@ export function filterAndSortProducts(
   } else if (options.sort === "price-desc") {
     sorted.sort((a, b) => b.price - a.price);
   } else if (options.sort === "newest") {
-    sorted.reverse();
+    sorted.sort((a, b) => {
+      const byId = Number(b.id) - Number(a.id);
+      return Number.isFinite(byId) && byId !== 0
+        ? byId
+        : b.id.localeCompare(a.id);
+    });
   } else {
     sorted.sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
   }

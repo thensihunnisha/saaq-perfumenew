@@ -290,11 +290,11 @@ function ContactLine({
       <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-saaq-gold/30 text-saaq-gold">
         <Icon size={16} strokeWidth={1.3} />
       </span>
-      <div>
+      <div className="min-w-0">
         <p className="saaq-eyebrow">{label}</p>
         <a
           href={href}
-          className="saaq-transition mt-1 block font-sans text-sm text-saaq-ivory/75 hover:text-saaq-gold"
+          className="saaq-transition mt-1 block break-words font-sans text-sm text-saaq-ivory/75 hover:text-saaq-gold"
           {...(external
             ? { target: "_blank", rel: "noopener noreferrer" }
             : {})}

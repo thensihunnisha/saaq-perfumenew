@@ -1,7 +1,13 @@
 import ProductCatalog from "@/components/ProductCatalog";
-import { products } from "@/data/products";
+import type { Product } from "@/data/products";
 
-export default function CollectionCatalog() {
+type CollectionCatalogProps = {
+  products: Product[];
+};
+
+export default function CollectionCatalog({
+  products,
+}: CollectionCatalogProps) {
   return (
     <ProductCatalog
       products={products}

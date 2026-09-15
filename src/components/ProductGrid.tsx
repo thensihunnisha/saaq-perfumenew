@@ -20,7 +20,7 @@ export default function ProductGrid({ products, className }: ProductGridProps) {
   return (
     <div
       className={cn(
-        "grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4",
+        "grid grid-cols-1 gap-x-4 gap-y-10 min-[360px]:grid-cols-2 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4",
         className
       )}
     >

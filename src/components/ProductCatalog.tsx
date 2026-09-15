@@ -93,7 +93,7 @@ export default function ProductCatalog({
               id="product-sort"
               value={sort}
               onChange={(event) => setSort(event.target.value as ProductSort)}
-              className="h-11 border border-white/15 bg-saaq-black px-4 font-sans text-[10px] uppercase tracking-[0.22em] text-saaq-ivory outline-none focus:border-saaq-gold"
+              className="h-11 w-full border border-white/15 bg-saaq-black px-4 font-sans text-[10px] uppercase tracking-[0.22em] text-saaq-ivory outline-none focus:border-saaq-gold sm:w-auto"
             >
               {SORT_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>

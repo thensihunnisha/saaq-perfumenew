@@ -31,11 +31,11 @@ export default function CollectionFeature({
     <section className={cn("bg-saaq-black", reverse ? "bg-saaq-void" : "")}>
       <div
         className={cn(
-          "grid min-h-[72vh] lg:grid-cols-2",
+          "grid min-h-0 lg:min-h-[72vh] lg:grid-cols-2",
           reverse ? "lg:[&>*:first-child]:order-2" : ""
         )}
       >
-        <div className="group relative min-h-[52vh] overflow-hidden bg-[#07081a] lg:min-h-[72vh]">
+        <div className="group relative min-h-[42vh] overflow-hidden bg-[#07081a] sm:min-h-[52vh] lg:min-h-[72vh]">
           <Reveal variant="image" className="absolute inset-0">
             <Image
               src={image}
@@ -45,7 +45,7 @@ export default function CollectionFeature({
               sizes="(max-width: 1024px) 100vw, 50vw"
               className={cn(
                 "saaq-img-zoom object-cover",
-                reverse ? "object-[center_right]" : "object-center"
+                reverse ? "object-center sm:object-[center_right]" : "object-center"
               )}
             />
           </Reveal>
@@ -58,7 +58,7 @@ export default function CollectionFeature({
               {title}
             </DisplayHeading>
             <Body className="mt-6 max-w-md">{statement}</Body>
-            <ButtonLink href={href} variant="outline" className="mt-10">
+            <ButtonLink href={href} variant="outline" className="mt-10 w-full text-center sm:w-auto">
               {cta}
             </ButtonLink>
           </Reveal>

@@ -13,7 +13,7 @@ export default function BrandIntro() {
       <Container>
         <Reveal className="mx-auto max-w-3xl text-center">
           <DisplayHeading as="h2">SAAQ</DisplayHeading>
-          <p className="mt-6 font-sans text-[11px] uppercase tracking-[0.32em] text-saaq-gold">
+          <p className="mt-6 font-sans text-[11px] uppercase tracking-[0.18em] text-saaq-gold sm:tracking-[0.32em]">
             The Art of Signature Fragrance
           </p>
           <GoldRule className="mx-auto mt-8" />

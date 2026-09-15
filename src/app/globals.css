@@ -33,7 +33,8 @@
   --saaq-gold: #c4a574;
   --saaq-gold-deep: #a89068;
   --saaq-announce-height: 36px;
-  --saaq-header-offset: calc(var(--saaq-announce-height) + 80px);
+  --saaq-header-height: 4rem;
+  --saaq-header-offset: calc(var(--saaq-announce-height) + var(--saaq-header-height));
   --saaq-max: 90rem;
 }
 
@@ -58,6 +59,7 @@ body {
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   line-height: 1.7;
+  overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -239,6 +241,12 @@ video {
 @media (min-width: 390px) {
   .saaq-container {
     padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 640px) {
+  :root {
+    --saaq-header-height: 5rem;
   }
 }
 

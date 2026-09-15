@@ -5,7 +5,8 @@ import { FormEvent, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import {
   getContactMailto,
-  getContactMapUrl,
+  getContactTel,
+  getNewsletterMailto,
   SAAQ_CONTACT,
 } from "@/config/contact";
 import { getEnquiryWhatsAppUrl } from "@/lib/whatsapp";
@@ -21,12 +22,16 @@ const NAVIGATION = [
 const COLLECTIONS = [
   { href: "/collection/gems", label: "Gems Collection" },
   { href: "/collection/takeoff", label: "Take Off Collection" },
+  { href: "/collection", label: "All Collections" },
 ] as const;
 
 const CUSTOMER = [
   { href: "/cart", label: "Cart" },
   { href: "/wishlist", label: "Wishlist" },
   { href: "/checkout", label: "Checkout" },
+  { href: "/shipping", label: "Shipping & Returns" },
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms & Conditions" },
 ] as const;
 
 const LEGAL = [
@@ -46,9 +51,14 @@ export default function Footer() {
       <div className="saaq-container py-16 lg:py-24">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1.6fr)] lg:gap-20">
           <div>
-            <p className="font-display text-4xl tracking-[0.28em] text-saaq-gold">
+            <Link
+              href="/"
+              aria-label="SAAQ home"
+              className="inline-block font-display text-3xl tracking-[0.22em] text-saaq-gold sm:text-4xl sm:tracking-[0.28em]"
+              onClick={scrollToTop}
+            >
               SAAQ
-            </p>
+            </Link>
             <p className="mt-4 max-w-sm font-sans text-[10px] uppercase leading-6 tracking-[0.28em] text-saaq-ivory/45">
               The art of signature fragrance
             </p>
@@ -60,13 +70,6 @@ export default function Footer() {
                 className="hover:border-[#E1306C]"
               >
                 <InstagramIcon />
-              </SocialLink>
-              <SocialLink
-                href={SAAQ_CONTACT.social.facebook.url}
-                label="Facebook"
-                className="text-[#1877F2] hover:border-[#1877F2]"
-              >
-                <FacebookIcon />
               </SocialLink>
               <SocialLink
                 href={whatsappHref}
@@ -83,7 +86,7 @@ export default function Footer() {
           <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
             <FooterGroup title="Navigation">
               {NAVIGATION.map((item) => (
-                <FooterLink key={item.href} href={item.href}>
+                <FooterLink key={`${item.label}-${item.href}`} href={item.href}>
                   {item.label}
                 </FooterLink>
               ))}
@@ -91,7 +94,7 @@ export default function Footer() {
 
             <FooterGroup title="Collections">
               {COLLECTIONS.map((item) => (
-                <FooterLink key={item.href} href={item.href}>
+                <FooterLink key={`${item.label}-${item.href}`} href={item.href}>
                   {item.label}
                 </FooterLink>
               ))}
@@ -99,7 +102,7 @@ export default function Footer() {
 
             <FooterGroup title="Customer">
               {CUSTOMER.map((item) => (
-                <FooterLink key={item.href} href={item.href}>
+                <FooterLink key={`${item.label}-${item.href}`} href={item.href}>
                   {item.label}
                 </FooterLink>
               ))}
@@ -119,19 +122,28 @@ export default function Footer() {
               <li>
                 <a
                   href={getContactMailto()}
-                  className="saaq-transition hover:text-saaq-gold"
+                  className="saaq-transition break-all hover:text-saaq-gold"
                 >
-                  Email
+                  {SAAQ_CONTACT.email}
                 </a>
               </li>
               <li>
                 <a
-                  href={getContactMapUrl()}
+                  href={getContactTel()}
+                  className="saaq-transition hover:text-saaq-gold"
+                >
+                  {SAAQ_CONTACT.phone.display}
+                </a>
+              </li>
+              <FooterLink href="/contact">Write to SAAQ</FooterLink>
+              <li>
+                <a
+                  href={SAAQ_CONTACT.social.instagram.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="saaq-transition hover:text-saaq-gold"
                 >
-                  Location
+                  Instagram
                 </a>
               </li>
             </FooterGroup>
@@ -146,10 +158,11 @@ export default function Footer() {
           </p>
           <ul className="flex flex-wrap gap-x-6 gap-y-2 font-sans text-[11px] uppercase tracking-[0.16em] text-saaq-ivory/35">
             {LEGAL.map((item) => (
-              <li key={item.href}>
+              <li key={`${item.label}-${item.href}`}>
                 <Link
                   href={item.href}
                   className="saaq-transition hover:text-saaq-gold"
+                  onClick={scrollToTop}
                 >
                   {item.label}
                 </Link>
@@ -164,6 +177,14 @@ export default function Footer() {
   );
 }
 
+function scrollToTop() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.scrollTo({ top: 0, left: 0 });
+}
+
 function FooterGroup({
   title,
   children,
@@ -171,19 +192,40 @@ function FooterGroup({
   title: string;
   children: ReactNode;
 }) {
+  const [open, setOpen] = useState(false);
+  const panelId = `footer-${title.toLowerCase().replace(/\s+/g, "-")}`;
+
   return (
-    <details className="group border-b border-white/10 py-4 lg:border-0 lg:py-0">
-      <summary className="flex cursor-pointer list-none items-center justify-between font-sans text-[10px] uppercase tracking-[0.26em] text-saaq-gold marker:content-none lg:pointer-events-none lg:cursor-default [&::-webkit-details-marker]:hidden">
+    <div className="border-b border-white/10 py-4 lg:border-0 lg:py-0">
+      <button
+        type="button"
+        className="flex w-full cursor-pointer items-center justify-between font-sans text-[10px] uppercase tracking-[0.26em] text-saaq-gold lg:hidden"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((current) => !current)}
+      >
         {title}
         <ChevronDown
           size={14}
-          className="saaq-transition text-saaq-gold/70 group-open:rotate-180 lg:hidden"
+          className={cn(
+            "saaq-transition text-saaq-gold/70",
+            open && "rotate-180"
+          )}
         />
-      </summary>
-      <ul className="mt-5 hidden space-y-3 font-sans text-sm text-saaq-ivory/50 group-open:block lg:mt-6 lg:block">
+      </button>
+      <p className="hidden font-sans text-[10px] uppercase tracking-[0.26em] text-saaq-gold lg:block">
+        {title}
+      </p>
+      <ul
+        id={panelId}
+        className={cn(
+          "mt-5 space-y-3 font-sans text-sm text-saaq-ivory/50 lg:mt-6 lg:block",
+          open ? "block" : "hidden"
+        )}
+      >
         {children}
       </ul>
-    </details>
+    </div>
   );
 }
 
@@ -196,7 +238,11 @@ function FooterLink({
 }) {
   return (
     <li>
-      <Link href={href} className="saaq-transition hover:text-saaq-gold">
+      <Link
+        href={href}
+        className="saaq-transition hover:text-saaq-gold"
+        onClick={scrollToTop}
+      >
         {children}
       </Link>
     </li>
@@ -205,17 +251,66 @@ function FooterLink({
 
 function NewsletterForm() {
   const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle"
+  );
+  const [message, setMessage] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!email.trim()) {
+    const nextEmail = email.trim().toLowerCase();
+
+    if (!nextEmail) {
       return;
     }
 
-    setSubscribed(true);
-    setEmail("");
+    setStatus("loading");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ email: nextEmail }),
+      });
+      const payload = (await response.json()) as {
+        success?: boolean;
+        message?: string;
+      };
+
+      if (response.status === 400) {
+        setStatus("error");
+        setMessage(payload.message || "Enter a valid email.");
+        return;
+      }
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.message || "Unable to join the list.");
+      }
+
+      setStatus("success");
+      setMessage(payload.message || "You are on the list. Welcome to SAAQ.");
+      setEmail("");
+    } catch (error) {
+      const fallback = getNewsletterMailto(nextEmail);
+
+      try {
+        window.location.assign(fallback);
+        setStatus("success");
+        setMessage("Opening your email to finish joining the SAAQ list.");
+        setEmail("");
+      } catch {
+        setStatus("error");
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "Unable to join the list right now."
+        );
+      }
+    }
   };
 
   return (
@@ -223,32 +318,42 @@ function NewsletterForm() {
       <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-ivory/70">
         Join the SAAQ world
       </p>
-      {subscribed ? (
-        <p className="mt-4 font-sans text-sm text-saaq-gold">
-          You are on the list. Welcome to SAAQ.
-        </p>
+      {status === "success" ? (
+        <p className="mt-4 font-sans text-sm text-saaq-gold">{message}</p>
       ) : (
         <form
           onSubmit={handleSubmit}
-          className="mt-4 flex border border-white/15"
+          className="mt-4 flex flex-col border border-white/15 sm:flex-row"
         >
           <input
             type="email"
             required
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (status === "error") {
+                setStatus("idle");
+                setMessage("");
+              }
+            }}
             placeholder="Email"
             aria-label="Email"
-            className="min-w-0 flex-1 bg-transparent px-4 py-3 font-sans text-sm text-saaq-ivory outline-none placeholder:text-saaq-ivory/30"
+            autoComplete="email"
+            disabled={status === "loading"}
+            className="min-w-0 flex-1 bg-transparent px-4 py-3 font-sans text-sm text-saaq-ivory outline-none placeholder:text-saaq-ivory/30 disabled:opacity-60"
           />
           <button
             type="submit"
-            className="saaq-transition bg-saaq-gold px-5 font-sans text-[10px] uppercase tracking-[0.2em] text-saaq-black hover:bg-saaq-gold-deep"
+            disabled={status === "loading"}
+            className="saaq-transition bg-saaq-gold px-5 py-3 font-sans text-[10px] uppercase tracking-[0.2em] text-saaq-black hover:bg-saaq-gold-deep disabled:opacity-70 sm:py-0"
           >
-            Subscribe
+            {status === "loading" ? "Joining" : "Subscribe"}
           </button>
         </form>
       )}
+      {status === "error" && message ? (
+        <p className="mt-3 font-sans text-sm text-saaq-gold">{message}</p>
+      ) : null}
     </div>
   );
 }
@@ -316,14 +421,6 @@ function InstagramIcon() {
         strokeWidth="1.5"
       />
       <circle cx="17.5" cy="6.5" r="1" fill="url(#footer-instagram-gradient)" />
-    </svg>
-  );
-}
-
-function FacebookIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M14 8h3V4h-3c-3.3 0-5 2-5 5v3H6v4h3v4h4v-4h3.5l.5-4H13V9c0-.7.3-1 1-1z" />
     </svg>
   );
 }

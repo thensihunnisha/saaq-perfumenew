@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import PageTransition from "@/components/PageTransition";
 import Providers from "@/components/Providers";
+import StoreChrome from "@/components/StoreChrome";
 
 const saaqSans = Inter({
   subsets: ["latin"],
@@ -42,11 +40,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <Providers>
-          <Header />
-          <main>
-            <PageTransition>{children}</PageTransition>
-          </main>
-          <Footer />
+          <StoreChrome>{children}</StoreChrome>
         </Providers>
       </body>
     </html>

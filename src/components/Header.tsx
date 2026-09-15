@@ -155,7 +155,7 @@ export default function Header() {
         <AnnouncementBar />
         <nav
           className={cn(
-            "saaq-transition relative flex h-20 items-center justify-between px-5 sm:px-8 lg:px-10 xl:px-12",
+            "saaq-transition relative flex h-16 items-center justify-between px-4 sm:h-20 sm:px-8 lg:px-10 xl:px-12",
             isTransparent
               ? "border-b border-transparent bg-transparent"
               : "border-b border-saaq-gold/20 bg-saaq-black/92 backdrop-blur-xl"
@@ -342,13 +342,13 @@ export default function Header() {
 
         <div
           className={cn(
-            "saaq-transition fixed inset-x-0 top-[calc(var(--saaq-announce-height)+5rem)] z-40 h-[calc(100vh-var(--saaq-header-offset))] overflow-y-auto bg-saaq-black/98 lg:hidden",
+            "saaq-transition fixed inset-x-0 top-[var(--saaq-header-offset)] z-40 h-[calc(100dvh-var(--saaq-header-offset))] overflow-y-auto bg-saaq-black/98 lg:hidden",
             menuOpen
               ? "visible opacity-100"
               : "invisible pointer-events-none opacity-0"
           )}
         >
-          <div className="flex flex-col px-7 py-8">
+          <div className="flex flex-col px-5 py-8 sm:px-7">
             <MobileLink href="/" label="Home" onClick={closeMenus} active={pathname === "/"} />
 
             <div className="border-b border-white/10">
@@ -414,9 +414,9 @@ export default function Header() {
 
 function LogoMark() {
   return (
-    <div className="relative flex h-12 w-12 items-center justify-center">
+    <div className="relative flex h-10 w-10 items-center justify-center sm:h-12 sm:w-12">
       <div className="saaq-transition absolute inset-0 rounded-full border border-saaq-gold/40 group-hover:border-saaq-gold" />
-      <div className="relative h-10 w-10 overflow-hidden rounded-full border border-saaq-gold/70 bg-saaq-black">
+      <div className="relative h-8 w-8 overflow-hidden rounded-full border border-saaq-gold/70 bg-saaq-black sm:h-10 sm:w-10">
         <Image
           src="/images/logo/saaq-logo.jpeg"
           alt=""

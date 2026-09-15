@@ -2,25 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ProductDetailView from "@/components/product/ProductDetailView";
 import { ButtonLink } from "@/components/ui";
-import {
-  getProductById,
-  getRelatedProducts,
-  products,
-} from "@/data/products";
+import { getRelatedProducts } from "@/data/products";
+import { getProduct, getProducts } from "@/lib/api";
 
 type ProductPageProps = {
   params: Promise<{ id: string }>;
 };
 
-export async function generateStaticParams() {
-  return products.map((product) => ({ id: product.id }));
-}
-
 export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getProduct(id).catch(() => null);
 
   if (!product) {
     return {
@@ -37,7 +30,7 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getProduct(id).catch(() => null);
 
   if (!product) {
     return (
@@ -62,7 +55,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
     );
   }
 
-  const related = getRelatedProducts(product);
+  const catalog = await getProducts().catch(() => []);
+  const related = getRelatedProducts(product, catalog);
 
   return (
     <ProductDetailView

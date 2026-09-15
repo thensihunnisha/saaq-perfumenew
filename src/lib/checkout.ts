@@ -116,6 +116,29 @@ export function validateCheckout(
   return errors;
 }
 
+export function buildPlaceOrderPayload(
+  items: CartItem[],
+  customer: CheckoutCustomer,
+  delivery: CheckoutDelivery
+) {
+  return {
+    customer: {
+      name: customer.fullName.trim(),
+      email: customer.email.trim(),
+      phone: customer.phone.trim(),
+      address: delivery.address.trim(),
+      apartment: delivery.apartment.trim(),
+      city: delivery.city.trim(),
+      emirate: delivery.emirate,
+      country: delivery.country.trim(),
+    },
+    items: items.map((item) => ({
+      productId: item.id,
+      quantity: item.quantity,
+    })),
+  };
+}
+
 export function buildCheckoutPayload(
   items: CartItem[],
   customer: CheckoutCustomer,

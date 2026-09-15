@@ -48,7 +48,7 @@ export default function OffersSection() {
 
       <div className="saaq-container relative saaq-section">
         <Reveal className="mx-auto max-w-2xl text-center">
-          <p className="font-sans text-[10px] uppercase tracking-[0.42em] text-saaq-gold">
+          <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-gold sm:tracking-[0.42em]">
             Exclusive SAAQ offer
           </p>
           <h2
@@ -96,7 +96,7 @@ export default function OffersSection() {
                 <p className="mt-5 font-sans text-[10px] uppercase tracking-[0.4em] text-saaq-ivory/40">
                   For
                 </p>
-                <p className="mt-5 font-display text-5xl leading-none tracking-[-0.04em] text-saaq-gold sm:text-6xl lg:text-7xl">
+                <p className="mt-5 font-display text-4xl leading-none tracking-[-0.04em] text-saaq-gold sm:text-6xl lg:text-7xl">
                   {combo.price}
                 </p>
               </Reveal>
@@ -120,7 +120,7 @@ export default function OffersSection() {
             <Link
               href={offer.href}
               aria-label="Shop the Take Off offer"
-              className="group/cta saaq-transition mt-10 inline-flex w-full items-center justify-center gap-3 border border-saaq-gold bg-transparent px-8 py-4 font-sans text-[10px] uppercase tracking-[0.32em] text-saaq-ivory hover:bg-saaq-gold hover:text-saaq-black sm:w-fit"
+              className="group/cta saaq-transition mt-10 inline-flex w-full items-center justify-center gap-3 border border-saaq-gold bg-transparent px-5 py-4 text-center font-sans text-[10px] uppercase tracking-[0.22em] text-saaq-ivory hover:bg-saaq-gold hover:text-saaq-black sm:w-fit sm:px-8 sm:tracking-[0.32em]"
             >
               Shop the Take Off offer
               <ArrowRight

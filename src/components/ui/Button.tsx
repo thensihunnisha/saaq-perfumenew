@@ -33,7 +33,7 @@ function buttonClassName({
   size = "md",
 }: Omit<SharedProps, "children">) {
   return cn(
-    "saaq-btn saaq-transition inline-flex items-center justify-center font-sans font-medium uppercase tracking-[0.28em]",
+    "saaq-btn saaq-transition inline-flex items-center justify-center text-center font-sans font-medium uppercase tracking-[0.18em] sm:tracking-[0.28em]",
     variants[variant],
     sizes[size],
     className

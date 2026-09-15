@@ -5,7 +5,13 @@ import Link from "next/link";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import TakeOffOfferNote from "@/components/cart/TakeOffOfferNote";
 import { toWhatsAppOrderItems, formatCollectionLabel } from "@/lib/whatsapp";
+import { getOrderTotals } from "@/lib/orderTotals";
+import {
+  getTakeOffLine,
+  isTakeOffCollection,
+} from "@/lib/takeOffPromotion";
 
 export default function CartDrawer() {
   const {
@@ -17,10 +23,7 @@ export default function CartDrawer() {
     removeItem,
   } = useCart();
 
-  const subtotal = items.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
+  const { subtotal, promotion } = getOrderTotals(items);
 
   return (
     <>
@@ -86,7 +89,10 @@ export default function CartDrawer() {
             </div>
           ) : (
             <ul className="space-y-5">
-              {items.map((item) => (
+              {items.map((item) => {
+                const takeOffLine = getTakeOffLine(promotion, item.id);
+
+                return (
                 <li
                   key={item.id}
                   className="flex gap-4 border-b border-white/10 pb-5"
@@ -110,7 +116,21 @@ export default function CartDrawer() {
                     </h3>
                     <p className="mt-1 font-['Inter',sans-serif] text-xs text-white/60">
                       AED {item.price.toFixed(2)}
+                      {takeOffLine && takeOffLine.freeQuantity > 0 ? (
+                        <span className="ml-2 uppercase tracking-[0.18em] text-[#d4af37]">
+                          {takeOffLine.freeQuantity === item.quantity
+                            ? "FREE"
+                            : `${takeOffLine.freeQuantity} FREE`}
+                        </span>
+                      ) : null}
                     </p>
+                    {isTakeOffCollection(item.collection) && takeOffLine ? (
+                      <p className="mt-1 font-['Inter',sans-serif] text-[10px] text-[#d4af37]">
+                        {takeOffLine.freeQuantity === item.quantity
+                          ? "FREE"
+                          : `AED ${takeOffLine.payableLineTotal.toFixed(2)}`}
+                      </p>
+                    ) : null}
 
                     <div className="mt-3 flex items-center justify-between">
                       <div className="flex items-center border border-white/20">
@@ -150,13 +170,27 @@ export default function CartDrawer() {
                     </div>
                   </div>
                 </li>
-              ))}
+                );
+              })}
             </ul>
           )}
         </div>
 
         {items.length > 0 && (
           <div className="border-t border-white/10 px-6 py-6">
+            {promotion.takeOffQuantity > 0 ? (
+              <div className="mb-4">
+                <TakeOffOfferNote promotion={promotion} compact />
+              </div>
+            ) : null}
+            {promotion.takeOffDiscount > 0 ? (
+              <div className="mb-2 flex items-center justify-between font-['Inter',sans-serif] text-xs text-white/50">
+                <span>Take Off offer</span>
+                <span className="text-[#d4af37]">
+                  - AED {promotion.takeOffDiscount.toFixed(2)}
+                </span>
+              </div>
+            ) : null}
             <div className="mb-4 flex items-center justify-between font-['Inter',sans-serif] text-sm">
               <span className="text-white/50">Subtotal</span>
               <span className="text-[#d4af37]">AED {subtotal.toFixed(2)}</span>

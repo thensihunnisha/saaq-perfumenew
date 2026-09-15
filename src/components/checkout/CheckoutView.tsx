@@ -2,7 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import { ArrowLeft, Lock, ShoppingBag } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, ShoppingBag } from "lucide-react";
 import {
   Body,
   Button,
@@ -13,18 +14,19 @@ import {
 import { useCart } from "@/context/CartContext";
 import { cn } from "@/lib/cn";
 import {
-  buildCheckoutPayload,
+  buildPlaceOrderPayload,
   CHECKOUT_COUNTRY,
   UAE_EMIRATES,
   validateCheckout,
   type CheckoutCustomer,
   type CheckoutDelivery,
-  type PaymentMethod,
 } from "@/lib/checkout";
-import { FREE_SHIPPING_THRESHOLD, getOrderTotals } from "@/lib/orderTotals";
-import { GATEWAY_PLACEHOLDER_MESSAGE, getPaymentProvider } from "@/lib/payments";
-import type { PaymentSession } from "@/lib/payments/types";
-import { formatCollectionLabel } from "@/lib/whatsapp";
+import { getOrderTotals } from "@/lib/orderTotals";
+import TakeOffOfferNote from "@/components/cart/TakeOffOfferNote";
+import {
+  getTakeOffLine,
+  isTakeOffCollection,
+} from "@/lib/takeOffPromotion";
 
 const emptyCustomer: CheckoutCustomer = {
   fullName: "",
@@ -40,84 +42,57 @@ const emptyDelivery: CheckoutDelivery = {
   country: CHECKOUT_COUNTRY,
 };
 
-const PAYMENT_OPTIONS: Array<{
-  value: PaymentMethod;
-  title: string;
-  description: string;
-}> = [
-  {
-    value: "card",
-    title: "Card payment",
-    description: "Visa, Mastercard and other cards via a secure gateway",
-  },
-  {
-    value: "cod",
-    title: "Cash on delivery",
-    description: "Pay when your fragrance arrives",
-  },
-  {
-    value: "online",
-    title: "Online payment",
-    description: "Apple Pay, Google Pay or a hosted payment page",
-  },
-];
-
 export default function CheckoutView() {
-  const { items, itemCount, isReady } = useCart();
+  const router = useRouter();
+  const { items, itemCount, isReady, clearCart } = useCart();
   const totals = getOrderTotals(items);
 
   const [customer, setCustomer] = useState(emptyCustomer);
   const [delivery, setDelivery] = useState(emptyDelivery);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [step, setStep] = useState<"form" | "review">("form");
   const [submitting, setSubmitting] = useState(false);
-  const [session, setSession] = useState<PaymentSession | null>(null);
 
-  const usesGateway =
-    paymentMethod === "card" || paymentMethod === "online";
-
-  const handleReview = (event: FormEvent<HTMLFormElement>) => {
+  const handlePlaceOrder = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSession(null);
 
-    const nextErrors = validateCheckout(customer, delivery, items.length);
-    setErrors(nextErrors);
-
-    if (Object.keys(nextErrors).length > 0) {
-      return;
-    }
-
-    setStep("review");
-  };
-
-  const handleConfirm = async () => {
     const nextErrors = validateCheckout(customer, delivery, items.length);
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0 || items.length === 0) {
-      setStep("form");
       return;
     }
 
     setSubmitting(true);
 
     try {
-      const payload = buildCheckoutPayload(
-        items,
-        customer,
-        delivery,
-        paymentMethod,
-        totals
-      );
-      const nextSession = await getPaymentProvider().startCheckout(payload);
-      setSession(nextSession);
-    } catch (error) {
-      setErrors({
-        cart:
-          error instanceof Error ? error.message : "Checkout could not continue.",
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(
+          buildPlaceOrderPayload(items, customer, delivery)
+        ),
       });
-      setStep("form");
+      const payload = (await response.json().catch(() => null)) as {
+        success?: boolean;
+        orderId?: number | string;
+        message?: string;
+      } | null;
+
+      if (!response.ok || !payload?.orderId) {
+        setErrors({
+          cart: payload?.message || "Unable to place order.",
+        });
+        return;
+      }
+
+      clearCart();
+      router.push(`/order-success/${payload.orderId}`);
+    } catch {
+      setErrors({
+        cart: "Unable to place order.",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -142,13 +117,13 @@ export default function CheckoutView() {
           />
           <Eyebrow className="mt-8">Checkout</Eyebrow>
           <DisplayHeading as="h1" className="mt-5 saaq-h1">
-            Your bag is empty
+            Your cart is empty.
           </DisplayHeading>
           <Body className="mx-auto mt-5 max-w-sm">
-            Checkout is unavailable until a fragrance is in your bag.
+            Add a fragrance before placing an order.
           </Body>
-          <ButtonLink href="/collection" className="mt-10">
-            Discover SAAQ collection
+          <ButtonLink href="/shop" className="mt-10">
+            Continue Shopping
           </ButtonLink>
         </div>
       </div>
@@ -159,200 +134,144 @@ export default function CheckoutView() {
     <div className="saaq-page bg-saaq-black text-saaq-ivory">
       <section className="border-b border-white/10">
         <div className="saaq-container py-12 sm:py-16">
-          <Eyebrow>{step === "review" ? "Order review" : "Checkout"}</Eyebrow>
+          <Eyebrow>Checkout</Eyebrow>
           <DisplayHeading as="h1" className="mt-5 saaq-h1">
-            {step === "review" ? "Review your order" : "Checkout"}
+            Checkout
           </DisplayHeading>
           <Body className="mt-5 max-w-xl">
-            {step === "review"
-              ? "Confirm contact, delivery, and payment. Card details are never entered or stored on SAAQ."
-              : "A frontend checkout ready for Stripe, Checkout.com, Telr, or Network International — without collecting card numbers."}
+            Enter your delivery details to place your SAAQ order. Payment will
+            be arranged separately.
           </Body>
         </div>
       </section>
 
       <div className="saaq-container py-12 lg:py-16">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)] lg:gap-16">
-          {step === "form" ? (
-            <form onSubmit={handleReview} className="space-y-14" noValidate>
-              <section>
-                <Eyebrow>Contact information</Eyebrow>
-                <h2 className="saaq-h2 mt-4">How we reach you</h2>
-                <div className="mt-8 grid gap-5">
+        <div className="grid min-w-0 gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(16rem,0.85fr)] lg:gap-16">
+          <form onSubmit={handlePlaceOrder} className="space-y-14" noValidate>
+            <section>
+              <Eyebrow>Customer information</Eyebrow>
+              <h2 className="saaq-h2 mt-4">How we reach you</h2>
+              <div className="mt-8 grid gap-5">
+                <Field
+                  label="Full Name"
+                  name="fullName"
+                  autoComplete="name"
+                  value={customer.fullName}
+                  error={errors.fullName}
+                  onChange={(value) =>
+                    setCustomer((current) => ({ ...current, fullName: value }))
+                  }
+                />
+                <div className="grid gap-5 sm:grid-cols-2">
                   <Field
-                    label="Full name"
-                    name="fullName"
-                    autoComplete="name"
-                    value={customer.fullName}
-                    error={errors.fullName}
+                    label="Email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    value={customer.email}
+                    error={errors.email}
                     onChange={(value) =>
-                      setCustomer((current) => ({ ...current, fullName: value }))
-                    }
-                  />
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <Field
-                      label="Email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      value={customer.email}
-                      error={errors.email}
-                      onChange={(value) =>
-                        setCustomer((current) => ({ ...current, email: value }))
-                      }
-                    />
-                    <Field
-                      label="Phone"
-                      name="phone"
-                      type="tel"
-                      autoComplete="tel"
-                      placeholder="+971 5X XXX XXXX"
-                      value={customer.phone}
-                      error={errors.phone}
-                      onChange={(value) =>
-                        setCustomer((current) => ({ ...current, phone: value }))
-                      }
-                    />
-                  </div>
-                </div>
-              </section>
-
-              <section>
-                <Eyebrow>Delivery address</Eyebrow>
-                <h2 className="saaq-h2 mt-4">Where it should arrive</h2>
-                <div className="mt-8 space-y-5">
-                  <Field
-                    label="Address"
-                    name="address"
-                    autoComplete="street-address"
-                    placeholder="Building / street / area"
-                    value={delivery.address}
-                    error={errors.address}
-                    onChange={(value) =>
-                      setDelivery((current) => ({ ...current, address: value }))
+                      setCustomer((current) => ({ ...current, email: value }))
                     }
                   />
                   <Field
-                    label="Apartment / villa"
-                    name="apartment"
-                    value={delivery.apartment}
+                    label="Phone"
+                    name="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    placeholder="+971 5X XXX XXXX"
+                    value={customer.phone}
+                    error={errors.phone}
                     onChange={(value) =>
-                      setDelivery((current) => ({
-                        ...current,
-                        apartment: value,
-                      }))
-                    }
-                  />
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <Field
-                      label="City"
-                      name="city"
-                      autoComplete="address-level2"
-                      value={delivery.city}
-                      error={errors.city}
-                      onChange={(value) =>
-                        setDelivery((current) => ({ ...current, city: value }))
-                      }
-                    />
-                    <div>
-                      <label
-                        htmlFor="emirate"
-                        className="mb-2 block font-sans text-[9px] uppercase tracking-[0.2em] text-saaq-ivory/50"
-                      >
-                        Emirate
-                      </label>
-                      <select
-                        id="emirate"
-                        name="emirate"
-                        value={delivery.emirate}
-                        onChange={(event) =>
-                          setDelivery((current) => ({
-                            ...current,
-                            emirate: event.target.value,
-                          }))
-                        }
-                        className="h-12 w-full appearance-none border border-white/15 bg-saaq-void px-4 font-sans text-xs text-saaq-ivory outline-none saaq-transition focus:border-saaq-gold"
-                      >
-                        {UAE_EMIRATES.map((emirate) => (
-                          <option key={emirate} value={emirate}>
-                            {emirate}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                  <Field
-                    label="Country"
-                    name="country"
-                    autoComplete="country-name"
-                    value={delivery.country}
-                    error={errors.country}
-                    onChange={(value) =>
-                      setDelivery((current) => ({
-                        ...current,
-                        country: value,
-                      }))
+                      setCustomer((current) => ({ ...current, phone: value }))
                     }
                   />
                 </div>
-              </section>
+              </div>
+            </section>
 
-              <section>
-                <Eyebrow>Payment method</Eyebrow>
-                <h2 className="saaq-h2 mt-4">How you will pay</h2>
-                <div className="mt-8 space-y-3">
-                  {PAYMENT_OPTIONS.map((option) => (
-                    <PaymentChoice
-                      key={option.value}
-                      selected={paymentMethod === option.value}
-                      title={option.title}
-                      description={option.description}
-                      onSelect={() => setPaymentMethod(option.value)}
-                    />
-                  ))}
-                </div>
-                {usesGateway ? (
-                  <div className="mt-5 flex gap-3 border border-saaq-gold/25 bg-saaq-gold/5 p-5">
-                    <Lock
-                      size={15}
-                      strokeWidth={1.3}
-                      className="mt-0.5 shrink-0 text-saaq-gold"
-                    />
-                    <p className="font-sans text-sm leading-6 text-saaq-ivory/75">
-                      {GATEWAY_PLACEHOLDER_MESSAGE}
-                    </p>
+            <section>
+              <Eyebrow>Delivery</Eyebrow>
+              <h2 className="saaq-h2 mt-4">Where it should arrive</h2>
+              <div className="mt-8 space-y-5">
+                <Field
+                  label="Address"
+                  name="address"
+                  autoComplete="street-address"
+                  placeholder="Building / street / area"
+                  value={delivery.address}
+                  error={errors.address}
+                  onChange={(value) =>
+                    setDelivery((current) => ({ ...current, address: value }))
+                  }
+                />
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Field
+                    label="City"
+                    name="city"
+                    autoComplete="address-level2"
+                    value={delivery.city}
+                    error={errors.city}
+                    onChange={(value) =>
+                      setDelivery((current) => ({ ...current, city: value }))
+                    }
+                  />
+                  <div>
+                    <label
+                      htmlFor="emirate"
+                      className="mb-2 block font-sans text-[9px] uppercase tracking-[0.2em] text-saaq-ivory/50"
+                    >
+                      Emirate
+                    </label>
+                    <select
+                      id="emirate"
+                      name="emirate"
+                      value={delivery.emirate}
+                      onChange={(event) =>
+                        setDelivery((current) => ({
+                          ...current,
+                          emirate: event.target.value,
+                        }))
+                      }
+                      className="h-12 w-full appearance-none border border-white/15 bg-saaq-void px-4 font-sans text-xs text-saaq-ivory outline-none saaq-transition focus:border-saaq-gold"
+                    >
+                      {UAE_EMIRATES.map((emirate) => (
+                        <option key={emirate} value={emirate}>
+                          {emirate}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.emirate ? (
+                      <p className="mt-2 font-sans text-[11px] text-red-300">
+                        {errors.emirate}
+                      </p>
+                    ) : null}
                   </div>
-                ) : (
-                  <p className="mt-5 font-sans text-xs leading-6 text-saaq-ivory/50">
-                    Cash on delivery is confirmed with your order. No card
-                    information is collected.
-                  </p>
-                )}
-              </section>
+                </div>
+                <Field
+                  label="Country"
+                  name="country"
+                  autoComplete="country-name"
+                  value={delivery.country}
+                  error={errors.country}
+                  onChange={(value) =>
+                    setDelivery((current) => ({
+                      ...current,
+                      country: value,
+                    }))
+                  }
+                />
+              </div>
+            </section>
 
-              {errors.cart ? (
-                <p className="font-sans text-xs text-red-300">{errors.cart}</p>
-              ) : null}
+            {errors.cart ? (
+              <p className="font-sans text-xs text-red-300">{errors.cart}</p>
+            ) : null}
 
-              <Button type="submit" size="lg">
-                Review order
-              </Button>
-            </form>
-          ) : (
-            <OrderReview
-              customer={customer}
-              delivery={delivery}
-              paymentMethod={paymentMethod}
-              usesGateway={usesGateway}
-              session={session}
-              submitting={submitting}
-              onBack={() => {
-                setSession(null);
-                setStep("form");
-              }}
-              onConfirm={handleConfirm}
-            />
-          )}
+            <Button type="submit" size="lg" disabled={submitting}>
+              {submitting ? "Placing order…" : "Place Order"}
+            </Button>
+          </form>
 
           <aside className="h-fit border border-saaq-gold/20 bg-saaq-void lg:sticky lg:top-28">
             <div className="border-b border-white/10 px-6 py-6 sm:px-8">
@@ -361,61 +280,118 @@ export default function CheckoutView() {
             </div>
 
             <ul className="px-6 sm:px-8">
-              {items.map((item) => (
+              {items.map((item) => {
+                const takeOffLine = getTakeOffLine(totals.promotion, item.id);
+                const lineTotal = takeOffLine
+                  ? takeOffLine.payableLineTotal
+                  : item.price * item.quantity;
+
+                return (
                 <li
                   key={item.id}
                   className="flex gap-4 border-b border-white/10 py-5 last:border-0"
                 >
                   <div className="relative h-20 w-16 shrink-0 overflow-hidden bg-saaq-charcoal">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      fill
-                      sizes="64px"
-                      className="object-cover"
-                    />
+                    {item.image?.startsWith("/") ? (
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    ) : null}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-display text-lg">{item.name}</p>
-                    <p className="saaq-meta mt-1">
-                      {formatCollectionLabel(item.collection)}
-                    </p>
-                    <div className="mt-2 flex justify-between font-sans text-xs text-saaq-ivory/55">
-                      <span>Qty {item.quantity}</span>
-                      <span>AED {item.price.toFixed(2)}</span>
+                    <div className="mt-2 space-y-1 font-sans text-xs text-saaq-ivory/55">
+                      <div className="flex justify-between">
+                        <span>Unit price</span>
+                        <span>AED {item.price.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Quantity</span>
+                        <span>{item.quantity}</span>
+                      </div>
+                      {takeOffLine && takeOffLine.freeQuantity > 0 ? (
+                        <div className="flex justify-between text-saaq-gold">
+                          <span>Take Off offer</span>
+                          <span>
+                            {takeOffLine.freeQuantity === item.quantity
+                              ? "FREE"
+                              : `${takeOffLine.freeQuantity} FREE`}
+                          </span>
+                        </div>
+                      ) : null}
+                      <div className="flex justify-between text-saaq-ivory/80">
+                        <span>Line total</span>
+                        <span>
+                          {isTakeOffCollection(item.collection) &&
+                          takeOffLine &&
+                          takeOffLine.freeQuantity === item.quantity
+                            ? "FREE"
+                            : `AED ${lineTotal.toFixed(2)}`}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </li>
-              ))}
+                );
+              })}
             </ul>
 
             <div className="space-y-3 border-t border-white/10 px-6 py-6 font-sans text-sm sm:px-8">
+              <TakeOffOfferNote promotion={totals.promotion} compact />
+              {totals.promotion.takeOffQuantity > 0 ? (
+                <>
+                  <SummaryRow
+                    label="Take Off original"
+                    value={`AED ${totals.promotion.originalTakeOffSubtotal.toFixed(2)}`}
+                  />
+                  {totals.promotion.takeOffDiscount > 0 ? (
+                    <SummaryRow
+                      label="Take Off offer"
+                      value={`- AED ${totals.promotion.takeOffDiscount.toFixed(2)}`}
+                      gold
+                    />
+                  ) : null}
+                  <SummaryRow
+                    label="Take Off subtotal"
+                    value={`AED ${totals.promotion.finalTakeOffSubtotal.toFixed(2)}`}
+                  />
+                  {totals.promotion.otherSubtotal > 0 ? (
+                    <SummaryRow
+                      label="Other items"
+                      value={`AED ${totals.promotion.otherSubtotal.toFixed(2)}`}
+                    />
+                  ) : null}
+                </>
+              ) : null}
               <SummaryRow
                 label="Subtotal"
                 value={`AED ${totals.subtotal.toFixed(2)}`}
               />
               <SummaryRow
-                label="Shipping"
+                label="Delivery charge"
                 value={
                   totals.shipping === 0
-                    ? "Complimentary"
+                    ? "Free"
                     : `AED ${totals.shipping.toFixed(2)}`
                 }
                 gold={totals.shipping === 0}
               />
-              {totals.shipping > 0 ? (
-                <p className="saaq-meta">
-                  Complimentary from AED {FREE_SHIPPING_THRESHOLD}
-                </p>
-              ) : null}
               <div className="flex items-end justify-between border-t border-white/10 pt-4">
-                <span className="font-display text-xl">Total</span>
+                <span className="font-display text-xl">Grand total</span>
                 <span className="font-display text-2xl text-saaq-gold">
                   AED {totals.total.toFixed(2)}
                 </span>
               </div>
               <p className="saaq-meta pt-2">
                 {itemCount} {itemCount === 1 ? "item" : "items"}
+              </p>
+              <p className="saaq-meta">
+                Final prices are confirmed from the SAAQ catalog when you place
+                the order.
               </p>
               <ButtonLink href="/cart" variant="ghost" className="mt-4 w-full gap-2">
                 <ArrowLeft size={13} strokeWidth={1.4} />
@@ -424,107 +400,6 @@ export default function CheckoutView() {
             </div>
           </aside>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function OrderReview({
-  customer,
-  delivery,
-  paymentMethod,
-  usesGateway,
-  session,
-  submitting,
-  onBack,
-  onConfirm,
-}: {
-  customer: CheckoutCustomer;
-  delivery: CheckoutDelivery;
-  paymentMethod: PaymentMethod;
-  usesGateway: boolean;
-  session: PaymentSession | null;
-  submitting: boolean;
-  onBack: () => void;
-  onConfirm: () => void;
-}) {
-  const methodLabel =
-    paymentMethod === "cod"
-      ? "Cash on delivery"
-      : paymentMethod === "online"
-        ? "Online payment"
-        : "Card payment";
-
-  return (
-    <div className="space-y-10">
-      <section className="border border-white/10 bg-saaq-void p-6 sm:p-8">
-        <Eyebrow>Contact</Eyebrow>
-        <p className="mt-4 font-display text-2xl">{customer.fullName}</p>
-        <p className="mt-3 font-sans text-sm text-saaq-ivory/60">{customer.email}</p>
-        <p className="mt-1 font-sans text-sm text-saaq-ivory/60">{customer.phone}</p>
-      </section>
-
-      <section className="border border-white/10 bg-saaq-void p-6 sm:p-8">
-        <Eyebrow>Delivery</Eyebrow>
-        <p className="mt-4 font-sans text-sm leading-7 text-saaq-ivory/75">
-          {delivery.address}
-          {delivery.apartment ? `, ${delivery.apartment}` : ""}
-          <br />
-          {delivery.city}, {delivery.emirate}
-          <br />
-          {delivery.country}
-        </p>
-      </section>
-
-      <section className="border border-white/10 bg-saaq-void p-6 sm:p-8">
-        <Eyebrow>Payment</Eyebrow>
-        <p className="mt-4 font-display text-2xl">{methodLabel}</p>
-        {usesGateway ? (
-          <p className="mt-4 font-sans text-sm leading-6 text-saaq-gold">
-            {GATEWAY_PLACEHOLDER_MESSAGE}
-          </p>
-        ) : (
-          <p className="mt-4 font-sans text-sm leading-6 text-saaq-ivory/55">
-            You will pay in cash when the order is delivered.
-          </p>
-        )}
-      </section>
-
-      {session?.kind === "placeholder" ? (
-        <div className="border border-saaq-gold/30 bg-saaq-gold/5 px-6 py-5">
-          <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-gold">
-            Payment provider
-          </p>
-          <p className="mt-3 font-sans text-sm leading-6 text-saaq-ivory/75">
-            {session.message}
-          </p>
-        </div>
-      ) : null}
-
-      {session?.kind === "cod" ? (
-        <div className="border border-saaq-gold/30 bg-saaq-gold/5 px-6 py-5">
-          <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-gold">
-            Order reviewed
-          </p>
-          <p className="mt-3 font-sans text-sm leading-6 text-saaq-ivory/75">
-            Reference {session.reference}. Connect fulfilment to confirm this
-            cash-on-delivery order. No payment card was stored.
-          </p>
-        </div>
-      ) : null}
-
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <Button
-          type="button"
-          size="lg"
-          onClick={onConfirm}
-          disabled={submitting || session !== null}
-        >
-          {submitting ? "Preparing…" : "Confirm order"}
-        </Button>
-        <Button type="button" variant="outline" size="lg" onClick={onBack}>
-          Edit details
-        </Button>
       </div>
     </div>
   );
@@ -591,49 +466,5 @@ function Field({
         <p className="mt-2 font-sans text-[11px] text-red-300">{error}</p>
       ) : null}
     </div>
-  );
-}
-
-function PaymentChoice({
-  selected,
-  title,
-  description,
-  onSelect,
-}: {
-  selected: boolean;
-  title: string;
-  description: string;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={cn(
-        "flex w-full items-center gap-4 border p-5 text-left saaq-transition",
-        selected
-          ? "border-saaq-gold bg-saaq-gold/5"
-          : "border-white/10 bg-saaq-void hover:border-white/25"
-      )}
-    >
-      <span
-        className={cn(
-          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
-          selected ? "border-saaq-gold" : "border-white/30"
-        )}
-      >
-        {selected ? (
-          <span className="h-2.5 w-2.5 rounded-full bg-saaq-gold" />
-        ) : null}
-      </span>
-      <span>
-        <span className="block font-sans text-[10px] uppercase tracking-[0.18em] text-saaq-ivory">
-          {title}
-        </span>
-        <span className="mt-1 block font-sans text-[11px] text-saaq-ivory/40">
-          {description}
-        </span>
-      </span>
-    </button>
   );
 }

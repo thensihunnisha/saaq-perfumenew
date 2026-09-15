@@ -9,6 +9,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { cn } from "@/lib/cn";
 import { COLLECTION_LABELS, type Product } from "@/data/products";
+import { getProductHref } from "@/lib/api";
 
 type ProductCardProps = {
   product: Product;
@@ -22,7 +23,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   const { isSaved, toggleItem } = useWishlist();
   const [added, setAdded] = useState(false);
   const saved = isSaved(product.id);
-  const href = `/product/${product.id}`;
+  const href = getProductHref(product.id);
   const hasOldPrice =
     typeof product.compareAtPrice === "number" &&
     product.compareAtPrice > product.price;
@@ -133,7 +134,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="pt-5">
         <Link href={href} className="block">
           <p className="saaq-eyebrow">{COLLECTION_LABELS[product.collection]}</p>
-          <h2 className="saaq-transition mt-2 font-display text-[1.35rem] text-saaq-ivory group-hover:text-saaq-gold">
+          <h2 className="saaq-transition mt-2 font-display text-[1.2rem] leading-tight text-saaq-ivory group-hover:text-saaq-gold sm:text-[1.35rem]">
             {product.name}
           </h2>
           <p className="saaq-meta mt-2">{product.category}</p>

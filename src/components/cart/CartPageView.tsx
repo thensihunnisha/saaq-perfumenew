@@ -7,7 +7,13 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import { Body, ButtonLink, DisplayHeading, Eyebrow } from "@/components/ui";
 import { useCart } from "@/context/CartContext";
 import { formatCollectionLabel, toWhatsAppOrderItems } from "@/lib/whatsapp";
+import { getProductHref } from "@/lib/api";
 import { FREE_SHIPPING_THRESHOLD, getOrderTotals } from "@/lib/orderTotals";
+import {
+  getTakeOffLine,
+  isTakeOffCollection,
+} from "@/lib/takeOffPromotion";
+import TakeOffOfferNote from "@/components/cart/TakeOffOfferNote";
 import { cn } from "@/lib/cn";
 
 export default function CartPageView() {
@@ -19,7 +25,7 @@ export default function CartPageView() {
     removeItem,
     clearCart,
   } = useCart();
-  const { subtotal, shipping, total } = getOrderTotals(items);
+  const { subtotal, shipping, total, promotion } = getOrderTotals(items);
 
   if (!isReady) {
     return (
@@ -79,11 +85,20 @@ export default function CartPageView() {
       </section>
 
       <section className="saaq-container py-12 lg:py-16">
-        <div className="grid gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.8fr)] lg:gap-16">
+        <div className="grid min-w-0 gap-12 lg:grid-cols-[minmax(0,1.4fr)_minmax(16rem,0.8fr)] lg:gap-16">
           <div>
             <ul className="divide-y divide-white/10 border-y border-white/10">
               {items.map((item) => {
-                const lineTotal = item.price * item.quantity;
+                const takeOffLine = getTakeOffLine(promotion, item.id);
+                const isTakeOff = isTakeOffCollection(item.collection);
+                const originalLineTotal = item.price * item.quantity;
+                const lineTotal = takeOffLine
+                  ? takeOffLine.payableLineTotal
+                  : originalLineTotal;
+                const hasDiscount =
+                  Boolean(takeOffLine) &&
+                  takeOffLine.originalLineTotal - takeOffLine.payableLineTotal >
+                    0.009;
 
                 return (
                   <li
@@ -91,7 +106,7 @@ export default function CartPageView() {
                     className="grid gap-6 py-8 sm:grid-cols-[7rem_1fr] sm:items-start lg:grid-cols-[8.5rem_1fr]"
                   >
                     <Link
-                      href={`/product/${item.id}`}
+                      href={getProductHref(item.id)}
                       className="relative aspect-[4/5] overflow-hidden bg-saaq-charcoal"
                     >
                       <Image
@@ -108,7 +123,7 @@ export default function CartPageView() {
                         <p className="saaq-eyebrow">
                           {formatCollectionLabel(item.collection)}
                         </p>
-                        <Link href={`/product/${item.id}`}>
+                        <Link href={getProductHref(item.id)}>
                           <h2 className="saaq-transition mt-2 font-display text-2xl text-saaq-ivory hover:text-saaq-gold">
                             {item.name}
                           </h2>
@@ -116,7 +131,19 @@ export default function CartPageView() {
                         <p className="saaq-meta mt-2">{item.category}</p>
                         <p className="mt-3 font-sans text-sm tracking-[0.08em] text-saaq-ivory/70">
                           AED {item.price.toFixed(2)}
+                          {takeOffLine && takeOffLine.freeQuantity > 0 ? (
+                            <span className="ml-3 text-[10px] uppercase tracking-[0.22em] text-saaq-gold">
+                              {takeOffLine.freeQuantity === item.quantity
+                                ? "FREE"
+                                : `${takeOffLine.freeQuantity} FREE`}
+                            </span>
+                          ) : null}
                         </p>
+                        {isTakeOff ? (
+                          <p className="saaq-meta mt-2 text-saaq-gold/80">
+                            Take Off offer
+                          </p>
+                        ) : null}
                       </div>
 
                       <div className="flex shrink-0 flex-col gap-4 sm:items-end">
@@ -147,7 +174,19 @@ export default function CartPageView() {
                         </div>
 
                         <p className="font-sans text-sm tracking-[0.08em] text-saaq-gold">
-                          AED {lineTotal.toFixed(2)}
+                          {takeOffLine &&
+                          takeOffLine.freeQuantity === item.quantity ? (
+                            "FREE"
+                          ) : (
+                            <>
+                              {hasDiscount ? (
+                                <span className="mr-2 text-saaq-ivory/30 line-through">
+                                  AED {originalLineTotal.toFixed(2)}
+                                </span>
+                              ) : null}
+                              AED {lineTotal.toFixed(2)}
+                            </>
+                          )}
                         </p>
 
                         <button
@@ -181,6 +220,31 @@ export default function CartPageView() {
             </div>
 
             <div className="space-y-4 px-6 py-6 font-sans text-sm sm:px-8">
+              <TakeOffOfferNote promotion={promotion} />
+              {promotion.takeOffQuantity > 0 ? (
+                <>
+                  <div className="flex justify-between text-saaq-ivory/60">
+                    <span>Take Off original</span>
+                    <span>AED {promotion.originalTakeOffSubtotal.toFixed(2)}</span>
+                  </div>
+                  {promotion.takeOffDiscount > 0 ? (
+                    <div className="flex justify-between text-saaq-gold">
+                      <span>Take Off offer</span>
+                      <span>- AED {promotion.takeOffDiscount.toFixed(2)}</span>
+                    </div>
+                  ) : null}
+                  <div className="flex justify-between text-saaq-ivory/80">
+                    <span>Take Off subtotal</span>
+                    <span>AED {promotion.finalTakeOffSubtotal.toFixed(2)}</span>
+                  </div>
+                  {promotion.otherSubtotal > 0 ? (
+                    <div className="flex justify-between text-saaq-ivory/60">
+                      <span>Other items</span>
+                      <span>AED {promotion.otherSubtotal.toFixed(2)}</span>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
               <div className="flex justify-between text-saaq-ivory/60">
                 <span>Subtotal</span>
                 <span>AED {subtotal.toFixed(2)}</span>
@@ -226,7 +290,7 @@ export default function CartPageView() {
                   secure gateway later.
                 </p>
                 <ButtonLink href="/checkout" className="mt-4 w-full">
-                  Proceed to checkout
+                  Proceed to Checkout
                 </ButtonLink>
               </div>
             </div>

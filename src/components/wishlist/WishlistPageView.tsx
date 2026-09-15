@@ -7,6 +7,7 @@ import { Body, Button, ButtonLink, DisplayHeading, Eyebrow } from "@/components/
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { COLLECTION_LABELS } from "@/data/products";
+import { getProductHref } from "@/lib/api";
 
 export default function WishlistPageView() {
   const { items, itemCount, isReady, removeItem, clearWishlist } = useWishlist();
@@ -36,7 +37,7 @@ export default function WishlistPageView() {
           <Body className="mx-auto mt-5 max-w-sm">
             Save the fragrances you wish to return to. They will wait here.
           </Body>
-          <ButtonLink href="/collection" className="mt-10">
+          <ButtonLink href="/collection" className="mt-10 w-full text-center sm:w-auto">
             Discover SAAQ collection
           </ButtonLink>
         </div>
@@ -77,7 +78,7 @@ export default function WishlistPageView() {
               className="grid gap-6 py-8 sm:grid-cols-[7rem_1fr] sm:items-center lg:grid-cols-[8.5rem_1fr_auto]"
             >
               <Link
-                href={`/product/${product.id}`}
+                href={getProductHref(product.id)}
                 className="relative aspect-[4/5] overflow-hidden bg-saaq-charcoal"
               >
                 <Image
@@ -93,7 +94,7 @@ export default function WishlistPageView() {
                 <p className="saaq-eyebrow">
                   {COLLECTION_LABELS[product.collection]}
                 </p>
-                <Link href={`/product/${product.id}`}>
+                <Link href={getProductHref(product.id)}>
                   <h2 className="saaq-transition mt-2 font-display text-2xl text-saaq-ivory hover:text-saaq-gold">
                     {product.name}
                   </h2>
@@ -107,14 +108,16 @@ export default function WishlistPageView() {
                 <Button
                   type="button"
                   size="sm"
+                  className="w-full sm:w-auto"
                   onClick={() => addItem(product, 1, { openDrawer: true })}
                 >
                   Add to cart
                 </Button>
                 <ButtonLink
-                  href={`/product/${product.id}`}
+                  href={getProductHref(product.id)}
                   variant="outline"
                   size="sm"
+                  className="w-full text-center sm:w-auto"
                 >
                   View product
                 </ButtonLink>

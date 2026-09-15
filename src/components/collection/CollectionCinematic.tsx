@@ -7,7 +7,7 @@ import OffersSection from "@/components/home/OffersSection";
 export default function CollectionCinematic() {
   return (
     <div>
-      <section className="relative h-[92svh] min-h-[640px] overflow-hidden bg-[#030303]">
+      <section className="relative h-[92svh] min-h-0 overflow-hidden bg-[#030303] sm:min-h-[640px]">
         <Image
           src="/images/collections/allcollection.jpg"
           alt="SAAQ fragrance collections"
@@ -15,7 +15,7 @@ export default function CollectionCinematic() {
           priority
           unoptimized
           sizes="100vw"
-          className="object-cover object-[center_right]"
+          className="object-cover object-center sm:object-[center_right]"
         />
 
         <div className="relative z-10 flex h-full items-center px-6 pt-24 sm:px-12 lg:px-20">
@@ -34,14 +34,14 @@ export default function CollectionCinematic() {
       </section>
 
       <section className="border-y border-white/10 bg-saaq-black">
-        <div className="saaq-container flex flex-col items-center gap-3 py-10 sm:flex-row sm:justify-center sm:gap-4">
-          <ButtonLink href="#catalog" size="sm">
+        <div className="saaq-container flex flex-col items-stretch gap-3 py-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4 sm:py-10">
+          <ButtonLink href="#catalog" size="sm" className="w-full text-center sm:w-auto">
             All Collection
           </ButtonLink>
-          <ButtonLink href="/collection/gems" variant="outline" size="sm">
+          <ButtonLink href="/collection/gems" variant="outline" size="sm" className="w-full text-center sm:w-auto">
             Gems Collection
           </ButtonLink>
-          <ButtonLink href="/collection/takeoff" variant="outline" size="sm">
+          <ButtonLink href="/collection/takeoff" variant="outline" size="sm" className="w-full text-center sm:w-auto">
             Take Off Collection
           </ButtonLink>
         </div>

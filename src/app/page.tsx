@@ -5,14 +5,11 @@ import FeaturedProducts from "@/components/home/FeaturedProducts";
 import FinalCta from "@/components/home/FinalCta";
 import OffersSection from "@/components/home/OffersSection";
 import StoryPreview from "@/components/home/StoryPreview";
-import { getProductById } from "@/data/products";
+import { getProducts, pickFeaturedProducts } from "@/lib/api";
 
-const FEATURED_IDS = ["noir", "emerald", "velvetkul", "crystl"] as const;
-
-export default function Home() {
-  const featuredProducts = FEATURED_IDS.map((id) => getProductById(id)).filter(
-    (product): product is NonNullable<typeof product> => Boolean(product)
-  );
+export default async function Home() {
+  const catalog = await getProducts().catch(() => []);
+  const featuredProducts = pickFeaturedProducts(catalog, 4);
 
   return (
     <>

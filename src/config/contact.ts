@@ -2,12 +2,12 @@ export const SAAQ_CONTACT = {
   brand: "SAAQ PERFUME",
   email: "info@saaqperfume.com",
   phone: {
-    display: "+971 54 254 9557",
-    tel: "+971542549557",
+    display: "+971 52 911 7712",
+    tel: "+971529117712",
   },
   whatsapp: {
-    number: "971542549557",
-    display: "+971 54 254 9557",
+    number: "971529117712",
+    display: "+971 52 911 7712",
   },
   location: {
     city: "Dubai",
@@ -52,4 +52,12 @@ export function getContactMapUrl() {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     SAAQ_CONTACT.location.mapQuery
   )}`;
+}
+
+export function getNewsletterMailto(email: string) {
+  const subject = encodeURIComponent("SAAQ newsletter");
+  const body = encodeURIComponent(
+    `Please add this address to the SAAQ list.\n\nEmail: ${email.trim()}`
+  );
+  return `mailto:${SAAQ_CONTACT.email}?subject=${subject}&body=${body}`;
 }

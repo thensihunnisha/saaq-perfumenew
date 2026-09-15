@@ -63,9 +63,9 @@ export default function ProductDetailView({
           Back to collection
         </Link>
 
-        <div className="mt-10 grid items-start gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 xl:gap-24">
+        <div className="mt-10 grid min-w-0 items-start gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 xl:gap-24">
           <div className="group relative overflow-hidden bg-saaq-charcoal">
-            <div className="relative aspect-[4/5] min-h-[420px] lg:min-h-[640px]">
+            <div className="relative aspect-[4/5] min-h-0 lg:min-h-[640px]">
               <Image
                 src={product.image}
                 alt={product.name}

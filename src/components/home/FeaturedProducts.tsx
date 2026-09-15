@@ -32,12 +32,18 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
           </ButtonLink>
         </Reveal>
 
-        <div className="mt-14 grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 md:gap-x-6">
-          {products.map((product, index) => (
-            <Reveal key={product.id} delay={index * 80}>
-              <ProductCard product={product} />
-            </Reveal>
-          ))}
+        <div className="mt-14 grid grid-cols-1 gap-x-4 gap-y-10 min-[360px]:grid-cols-2 md:grid-cols-4 md:gap-x-6">
+          {products.length > 0 ? (
+            products.map((product, index) => (
+              <Reveal key={product.id} delay={index * 80}>
+                <ProductCard product={product} />
+              </Reveal>
+            ))
+          ) : (
+            <p className="col-span-full font-sans text-sm text-saaq-ivory/50">
+              Fragrances will appear here from the SAAQ collection.
+            </p>
+          )}
         </div>
       </Container>
     </Section>

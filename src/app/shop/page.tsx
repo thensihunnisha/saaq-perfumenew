@@ -1,110 +1,18 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { MessageCircle } from "lucide-react";
-import { getProductWhatsAppUrl } from "@/lib/whatsapp";
-
-type Product = {
-  id: number;
-  name: string;
-  collection: string;
-  price: number;
-  image: string;
-  description: string;
-};
-
-const products: Product[] = [
-  {
-    id: 1,
-    name: "Noir Enj",
-    collection: "takeoff",
-    price: 299,
-    image: "/images/products/noireng.jpg",
-    description:
-      "Noir Enj by Saaq is a Woody Aquatic fragrance for women and men. Noir by Saaq was launched in 2022. The nose behind this fragrance is Marie Salamagne. Top notes are Incense and Coriander; middle notes are Caviar, Mate and Dreamwood; base notes are Sandalwood, Guaiac Wood and Cashmere Wood",
-  },
-  {
-    id: 2,
-    name: "Ocean Mle",
-    collection: "Takeoff",
-    price: 249,
-    image: "/images/products/oceanmle.jpg",
-    description:
-      "Ocean Man by BellaVita is a fragrance for women and men. Ocean Man was launched in 2023. Top notes are Aquatic notes, Citrus and Salt; middle notes are Orchid and Floral Notes; base notes are Musk and Woody Notes.",
-  },
-  {
-    id: 3,
-    name: "Opulance Ccj",
-    collection: "Takeoff",
-    price: 279,
-    image: "/images/products/opulance.jpeg",
-    description:
-      "OPULENCE OF DUBAI by Swiss Arabian is a Woody Spicy fragrance for women and men. OPULENCE OF DUBAI was launched in 2023. The nose behind this fragrance is Ilias Ermenidis. Top notes are Nigerian Ginger, elemi and Calabrian bergamot; middle notes are Damask Rose, Cardamom, Pink Pepper and Chocolate; base notes are Incense, Atlas Cedar, Cypriol Oil or Nagarmotha, Amber, Bourbon Vanilla, Vetiver and Roasted Coffee Beans.",
-  },
-  {
-    id: 4,
-    name: "Oud Dxb",
-    collection: "Takeoff",
-    price: 279,
-    image: "/images/products/ouddxb.jpg",
-    description:
-      "OPULENCE OF DUBAI by Swiss Arabian is a Woody Spicy fragrance for women and men. OPULENCE OF DUBAI was launched in 2023. The nose behind this fragrance is Ilias Ermenidis. Top notes are Nigerian Ginger, elemi and Calabrian bergamot; middle notes are Damask Rose, Cardamom, Pink Pepper and Chocolate; base notes are Incense, Atlas Cedar, Cypriol Oil or Nagarmotha, Amber, Bourbon Vanilla, Vetiver and Roasted Coffee Beans.",
-  },
-  {
-    id: 5,
-    name: "silent Zrh",
-    collection: "Takeoff",
-    price: 279,
-    image: "/images/products/silentZrh.jpg",
-    description:
-      "OPULENCE OF DUBAI by Swiss Arabian is a Woody Spicy fragrance for women and men. OPULENCE OF DUBAI was launched in 2023. The nose behind this fragrance is Ilias Ermenidis. Top notes are Nigerian Ginger, elemi and Calabrian bergamot; middle notes are Damask Rose, Cardamom, Pink Pepper and Chocolate; base notes are Incense, Atlas Cedar, Cypriol Oil or Nagarmotha, Amber, Bourbon Vanilla, Vetiver and Roasted Coffee Beans.",
-  },
-  {
-    id: 6,
-    name: "Vanilla Mex",
-    collection: "Takeoff",
-    price: 279,
-    image: "/images/products/vanillamex.jpeg",
-    description:
-      "Vanilla by Tom Ford is a Oriental Vanilla fragrance for women and men. Vanilla was launched in 2023. The fragrance features Indian Vanilla, Vanilla Absolute, Sandalwood, Animal notes, Orris Root and Jasmine.",
-  },
-  {
-    id: 7,
-    name: "Velvet Kul",
-    collection: "Takeoff",
-    price: 279,
-    image: "/images/products/velvetkul.jpg",
-    description:
-      "OPULENCE OF DUBAI by Swiss Arabian is a Woody Spicy fragrance for women and men. OPULENCE OF DUBAI was launched in 2023. The nose behind this fragrance is Ilias Ermenidis. Top notes are Nigerian Ginger, elemi and Calabrian bergamot; middle notes are Damask Rose, Cardamom, Pink Pepper and Chocolate; base notes are Incense, Atlas Cedar, Cypriol Oil or Nagarmotha, Amber, Bourbon Vanilla, Vetiver and Roasted Coffee Beans.",
-  },
-  {
-    id: 8,
-    name: "Emerald",
-    collection: "gems",
-    price: 279,
-    image: "/images/products/emerald.jpeg",
-    description:
-      "Emerald by Saaq is a Floral Fruity fragrance for women and men. Emerald was launched in 2022. The nose behind this fragrance is Camille Gazal. Top notes are Pink Pepper, Red Berries and Strawberry; middle notes are Lily of the Valley, Jasmine and Ylang-Ylang; base notes are Patchouli, Sandalwood and Vanilla.",
-  },
-  {
-    id: 9,
-    name: "Crystl",
-    collection: "gems",
-    price: 279,
-    image: "/images/products/crystl.jpg",
-    description:
-      "Crystl by Saaq is a Floral Fruity fragrance for women and men. Crystl was launched in 2022. The nose behind this fragrance is Camille Gazal. Top notes are Pink Pepper, Red Berries and Strawberry; middle notes are Lily of the Valley, Jasmine and Ylang-Ylang; base notes are Patchouli, Sandalwood and Vanilla.",
-  },
-];
+import { getProducts } from "@/lib/api";
+import WhatsAppButton from "@/components/WhatsAppButton";
+import type { Product } from "@/data/products";
 
 export default function ShopPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#080808] pt-[114px]" />
+        <div className="min-h-screen bg-[#080808] pt-[var(--saaq-header-offset)]" />
       }
     >
       <ShopContent />
@@ -114,6 +22,35 @@ export default function ShopPage() {
 
 function ShopContent() {
   const searchParams = useSearchParams();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getProducts()
+      .then((items) => {
+        if (!cancelled) {
+          setProducts(items);
+          setHasError(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHasError(true);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const collectionParam = searchParams.get("collection");
 
@@ -138,21 +75,8 @@ function ShopContent() {
         ? "Gems Collection"
         : "All Fragrances";
 
-  /*
-   * BUILD A WHATSAPP ORDER LINK FOR A PRODUCT
-   */
-  const getWhatsAppLink = (product: Product) =>
-    getProductWhatsAppUrl({
-      name: product.name,
-      collection: product.collection,
-      category:
-        product.collection === "takeoff" ? "Take Off" : "Gems",
-      quantity: 1,
-      price: product.price,
-    });
-
   return (
-    <div className="min-h-screen bg-[#080808] pt-[114px] text-white">
+    <div className="min-h-screen bg-[#080808] pt-[var(--saaq-header-offset)] text-white">
       {/* HERO */}
       <section className="relative flex min-h-[300px] items-center justify-center overflow-hidden">
         <Image
@@ -172,7 +96,7 @@ function ShopContent() {
         <div className="absolute inset-0 bg-black/60" />
 
         <div className="relative z-10 px-6 text-center">
-          <p className="mb-3 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.4em] text-[#d4af37]">
+          <p className="mb-3 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.22em] text-[#d4af37] sm:tracking-[0.4em]">
             SAAQ PERFUME
           </p>
 
@@ -188,7 +112,7 @@ function ShopContent() {
 
       {/* COLLECTION FILTER */}
       <section className="border-b border-white/10 bg-[#080808]">
-        <div className="mx-auto flex max-w-7xl items-center justify-center gap-8 px-6 py-5">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-5 gap-y-3 px-4 py-5 sm:gap-8 sm:px-6">
           <CollectionLink
             href="/shop"
             label="All Fragrances"
@@ -211,6 +135,20 @@ function ShopContent() {
 
       {/* PRODUCTS */}
       <section className="mx-auto max-w-7xl px-6 py-10">
+        {isLoading ? (
+          <p className="py-20 text-center font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.28em] text-white/40">
+            Loading fragrances
+          </p>
+        ) : null}
+
+        {hasError ? (
+          <p className="py-20 text-center font-['Inter',sans-serif] text-sm text-white/50">
+            Unable to load fragrances. Please try again.
+          </p>
+        ) : null}
+
+        {!isLoading && !hasError ? (
+          <>
         {/* RESULT COUNT */}
         <div className="mb-8 flex items-center justify-between">
           <p className="font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.25em] text-white/40">
@@ -231,7 +169,7 @@ function ShopContent() {
 
         {/* PRODUCT GRID */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-x-5 gap-y-10 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
@@ -278,23 +216,10 @@ function ShopContent() {
                   </div>
                 </Link>
 
-                {/* WHATSAPP ORDER BUTTON — REPLACES ADD TO CART */}
-                
-                 <a href={getWhatsAppLink(product)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group/waBtn mt-4 flex w-full items-center justify-center gap-2 rounded-none border border-[#25D366]/40 bg-black/40 px-4 py-2.5 backdrop-blur-sm transition-all duration-300 hover:border-[#25D366] hover:bg-[#25D366] hover:shadow-[0_0_15px_rgba(37,211,102,0.25)] active:scale-95"
-                >
-                  <MessageCircle
-                    size={13}
-                    strokeWidth={1.5}
-                    className="text-[#25D366] transition-transform duration-300 group-hover/waBtn:scale-110 group-hover/waBtn:text-black"
-                  />
-
-                  <span className="font-['Inter',sans-serif] text-[9px] font-medium uppercase tracking-[0.2em] text-[#25D366] transition-colors duration-300 group-hover/waBtn:text-black">
-                    Order via WhatsApp
-                  </span>
-                </a>
+                <WhatsAppButton
+                  product={product}
+                  className="group/waBtn mt-4 rounded-none border border-[#25D366]/40 bg-black/40 px-4 py-2.5 backdrop-blur-sm hover:shadow-[0_0_15px_rgba(37,211,102,0.25)]"
+                />
               </div>
             ))}
           </div>
@@ -308,10 +233,12 @@ function ShopContent() {
               href="/shop"
               className="mt-6 inline-block border border-[#d4af37] px-6 py-3 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.25em] text-[#d4af37]"
             >
-              View All Fragrances
+              View All Fragrancesffghty
             </Link>
           </div>
         )}
+          </>
+        ) : null}
       </section>
     </div>
   );

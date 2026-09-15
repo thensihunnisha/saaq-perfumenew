@@ -111,11 +111,12 @@ export default function CollectionWorld({
               {content.ctaTitle}
             </DisplayHeading>
             <Body className="mx-auto mt-5 max-w-md">{content.ctaBody}</Body>
-            <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <ButtonLink href={content.ctaHref}>{content.ctaLabel}</ButtonLink>
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+              <ButtonLink href={content.ctaHref} className="w-full text-center sm:w-auto">{content.ctaLabel}</ButtonLink>
               <ButtonLink
                 href={isGems ? "/collection/takeoff" : "/collection/gems"}
                 variant="outline"
+                className="w-full text-center sm:w-auto"
               >
                 {isGems ? "Discover Take Off" : "Discover Gems"}
               </ButtonLink>
