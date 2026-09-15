@@ -15,13 +15,16 @@ import {
 
 export default function CartDrawer() {
   const {
-    items,
-    itemCount,
+    items: storedItems,
+    itemCount: storedCount,
+    isReady,
     isDrawerOpen,
     closeDrawer,
     updateQuantity,
     removeItem,
   } = useCart();
+  const items = isReady ? storedItems : [];
+  const itemCount = isReady ? storedCount : 0;
 
   const { subtotal, promotion } = getOrderTotals(items);
 

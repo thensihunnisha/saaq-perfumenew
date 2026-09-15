@@ -67,6 +67,16 @@ export type AdminCustomerDetail = AdminCustomerListItem & {
   orders?: AdminOrderListItem[];
 };
 
+export type AdminContactMessage = {
+  id: number | string;
+  name?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  subject?: string | null;
+  message?: string | null;
+  created_at?: string | null;
+};
+
 async function readAdminJson<T>(path: string): Promise<T | null> {
   const response = await expressAdminRequest(path, "GET");
 
@@ -99,6 +109,16 @@ export function getAdminCustomers() {
 
 export function getAdminCustomer(id: string) {
   return readAdminJson<AdminCustomerDetail>(`/api/customers/${id}`);
+}
+
+export function getAdminMessages() {
+  return readAdminJson<AdminContactMessage[]>("/api/contact").then((rows) =>
+    Array.isArray(rows) ? rows : []
+  );
+}
+
+export function getAdminMessage(id: string) {
+  return readAdminJson<AdminContactMessage>(`/api/contact/${id}`);
 }
 
 export function formatAed(value?: number | string | null) {

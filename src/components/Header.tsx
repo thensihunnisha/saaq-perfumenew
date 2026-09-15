@@ -39,8 +39,10 @@ const COLLECTION_LINKS = [
 
 export default function Header() {
   const pathname = usePathname();
-  const { itemCount, openDrawer } = useCart();
-  const { itemCount: wishlistCount } = useWishlist();
+  const { itemCount, isReady: cartReady, openDrawer } = useCart();
+  const { itemCount: wishlistCount, isReady: wishlistReady } = useWishlist();
+  const cartCount = cartReady ? itemCount : 0;
+  const savedCount = wishlistReady ? wishlistCount : 0;
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -296,18 +298,18 @@ export default function Header() {
             <Link
               href="/wishlist"
               onClick={closeMenus}
-              aria-label={`Wishlist, ${wishlistCount} saved`}
+              aria-label={`Wishlist, ${savedCount} saved`}
               className="saaq-transition group relative flex h-10 w-10 items-center justify-center text-saaq-ivory hover:text-saaq-gold"
             >
               <Heart size={18} strokeWidth={1.4} />
               <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center bg-saaq-gold px-1 font-sans text-[8px] font-semibold text-saaq-black">
-                {wishlistCount}
+                {savedCount}
               </span>
             </Link>
 
             <button
               type="button"
-              aria-label={`Shopping cart, ${itemCount} items`}
+              aria-label={`Shopping cart, ${cartCount} items`}
               onClick={() => {
                 closeMenus();
                 openDrawer();
@@ -316,7 +318,7 @@ export default function Header() {
             >
               <ShoppingBag size={18} strokeWidth={1.4} />
               <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center bg-saaq-gold px-1 font-sans text-[8px] font-semibold text-saaq-black">
-                {itemCount}
+                {cartCount}
               </span>
             </button>
 
@@ -422,6 +424,7 @@ function LogoMark() {
           alt=""
           fill
           priority
+          unoptimized
           sizes="40px"
           className="object-cover"
         />

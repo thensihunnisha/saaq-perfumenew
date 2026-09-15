@@ -15,8 +15,6 @@ const UAE_EMIRATES = [
   "Umm Al Quwain",
 ];
 
-const FREE_SHIPPING_THRESHOLD = 300;
-const STANDARD_SHIPPING_AED = 25;
 const WHATSAPP_GUEST_EMAIL = "whatsapp.orders@saaqperfume.com";
 
 let orderColumnsReady = false;
@@ -28,12 +26,8 @@ class CheckoutError extends Error {
   }
 }
 
-function getDeliveryCharge(subtotal) {
-  if (subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD) {
-    return 0;
-  }
-
-  return STANDARD_SHIPPING_AED;
+function getDeliveryCharge(_subtotal) {
+  return 0;
 }
 
 function isEmail(value) {
@@ -98,7 +92,7 @@ function whatsappGuestCustomer() {
   };
 }
 
-function buildWhatsAppNotes(orderItems, productsById, promotion) {
+function buildWhatsAppNotes(orderItems, productsById, promotion, delivery, totalAmount) {
   const lines = orderItems.map((item, index) => {
     const product = productsById.get(item.productId);
     const name = product?.name || `Product #${item.productId}`;
@@ -112,7 +106,8 @@ function buildWhatsAppNotes(orderItems, productsById, promotion) {
     ...lines,
     "",
     `Subtotal: AED ${promotion.subtotal.toFixed(2)}`,
-    `Total: AED ${promotion.subtotal.toFixed(2)}`,
+    `Shipping: ${delivery === 0 ? "Complimentary" : `AED ${delivery.toFixed(2)}`}`,
+    `Total: AED ${totalAmount.toFixed(2)}`,
     "",
     "Customer and delivery details to be confirmed on WhatsApp.",
   ].join("\n");
@@ -313,11 +308,17 @@ async function createStorefrontOrder(body) {
     }
 
     const subtotal = promotion.subtotal;
-    const delivery = channel === "checkout" ? getDeliveryCharge(subtotal) : 0;
+    const delivery = getDeliveryCharge(subtotal);
     const totalAmount = money(subtotal + delivery);
     const notes =
       channel === "whatsapp"
-        ? buildWhatsAppNotes(orderItems, productsById, promotion)
+        ? buildWhatsAppNotes(
+            orderItems,
+            productsById,
+            promotion,
+            delivery,
+            totalAmount
+          )
         : null;
     const customerId = await upsertCustomer(connection, customer);
 

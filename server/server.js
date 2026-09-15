@@ -13,6 +13,7 @@ const collectionRoutes = require("./routes/collectionRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const newsletterRoutes = require("./routes/newsletterRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 
 const app = express();
 const port = Number(process.env.PORT) || 5000;
@@ -51,6 +52,7 @@ app.use("/api/collections", collectionRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/newsletter", newsletterRoutes);
+app.use("/api/contact", contactRoutes);
 
 app.listen(port, () => {
   console.log(`SAAQ API running on http://localhost:${port}`);

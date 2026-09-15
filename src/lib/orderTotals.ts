@@ -21,12 +21,8 @@ export type OrderTotals = {
   promotion: TakeOffPromotionResult;
 };
 
-export function getShipping(subtotal: number) {
-  if (subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD) {
-    return 0;
-  }
-
-  return STANDARD_SHIPPING_AED;
+export function getShipping(_subtotal?: number) {
+  return 0;
 }
 
 export function getOrderTotals(items: OrderTotalItem[]): OrderTotals {

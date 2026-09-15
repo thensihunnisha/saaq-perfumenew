@@ -1,9 +1,7 @@
 import { SAAQ_WHATSAPP_NUMBER } from "@/config/whatsapp";
 import { COLLECTION_LABELS, type CollectionSlug } from "@/data/products";
-import {
-  calculateTakeOffPromotion,
-  getTakeOffLine,
-} from "@/lib/takeOffPromotion";
+import { FREE_SHIPPING_THRESHOLD, getOrderTotals } from "@/lib/orderTotals";
+import { getTakeOffLine } from "@/lib/takeOffPromotion";
 
 export type WhatsAppOrderItem = {
   id?: string;
@@ -35,43 +33,18 @@ export function formatCollectionLabel(collection: string) {
 }
 
 export function buildProductOrderMessage(item: WhatsAppOrderItem) {
-  return [
-    "Hello SAAQ,",
-    "",
-    "I would like to order:",
-    "",
-    "Product:",
-    item.name,
-    "",
-    "Collection:",
-    formatCollectionLabel(item.collection),
-    "",
-    "Category:",
-    item.category,
-    "",
-    "Quantity:",
-    String(item.quantity),
-    "",
-    "Price:",
-    `AED ${formatAed(item.price)}`,
-    "",
-    "Please confirm availability and delivery details.",
-  ].join("\n");
+  return buildCartOrderMessage([item]);
 }
 
 export function buildCartOrderMessage(items: WhatsAppOrderItem[]) {
-  const promotion = calculateTakeOffPromotion(
-    items.map((item, index) => ({
-      id: item.id || `${item.name}-${index}`,
-      collection: item.collection,
-      price: item.price,
-      quantity: item.quantity,
-    }))
-  );
+  const normalized = items.map((item, index) => ({
+    ...item,
+    id: item.id || `${item.name}-${index}`,
+  }));
+  const { subtotal, shipping, total, promotion } = getOrderTotals(normalized);
 
-  const lines = items.map((item, index) => {
-    const lineId = item.id || `${item.name}-${index}`;
-    const takeOffLine = getTakeOffLine(promotion, lineId);
+  const lines = normalized.map((item, index) => {
+    const takeOffLine = getTakeOffLine(promotion, item.id);
     const lineTotal = takeOffLine
       ? takeOffLine.payableLineTotal
       : item.price * item.quantity;
@@ -89,7 +62,7 @@ export function buildCartOrderMessage(items: WhatsAppOrderItem[]) {
       `Quantity: ${item.quantity}`,
       `Price: AED ${formatAed(item.price)}`,
       freeLabel ? `Offer: ${freeLabel}` : null,
-      `Subtotal: AED ${formatAed(lineTotal)}`,
+      `Line total: AED ${formatAed(lineTotal)}`,
     ]
       .filter((line): line is string => Boolean(line))
       .join("\n");
@@ -119,10 +92,16 @@ export function buildCartOrderMessage(items: WhatsAppOrderItem[]) {
     ...summary.flatMap((line) => [line]),
     summary.length ? "" : null,
     "Subtotal:",
-    `AED ${formatAed(promotion.subtotal)}`,
+    `AED ${formatAed(subtotal)}`,
+    "",
+    "Shipping:",
+    shipping === 0 ? "Complimentary" : `AED ${formatAed(shipping)}`,
+    shipping > 0
+      ? `Complimentary shipping from AED ${FREE_SHIPPING_THRESHOLD}`
+      : null,
     "",
     "Total:",
-    `AED ${formatAed(promotion.subtotal)}`,
+    `AED ${formatAed(total)}`,
     "",
     "Please confirm availability and delivery details.",
   ]

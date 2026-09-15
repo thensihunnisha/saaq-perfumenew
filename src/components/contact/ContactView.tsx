@@ -42,9 +42,11 @@ export default function ContactView() {
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const chatHref = getEnquiryWhatsAppUrl();
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const nextErrors: Record<string, string> = {};
@@ -56,13 +58,44 @@ export default function ContactView() {
     if (!form.message.trim()) nextErrors.message = "Enter a message.";
 
     setErrors(nextErrors);
+    setSubmitError("");
 
     if (Object.keys(nextErrors).length > 0) {
       return;
     }
 
-    setSent(true);
-    setForm(emptyForm);
+    setSubmitting(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          phone: form.phone.trim(),
+          subject: form.subject,
+          message: form.message.trim(),
+        }),
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        message?: string;
+      } | null;
+
+      if (!response.ok) {
+        setSubmitError(payload?.message || "Unable to send your message.");
+        return;
+      }
+
+      setSent(true);
+      setForm(emptyForm);
+    } catch {
+      setSubmitError("Unable to send your message.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -160,7 +193,10 @@ export default function ContactView() {
                 type="button"
                 variant="outline"
                 className="mt-8"
-                onClick={() => setSent(false)}
+                onClick={() => {
+                  setSent(false);
+                  setSubmitError("");
+                }}
               >
                 Send another message
               </Button>
@@ -258,9 +294,14 @@ export default function ContactView() {
                   </p>
                 ) : null}
               </div>
-              <Button type="submit" size="lg" className="w-full">
-                Send message
+              <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+                {submitting ? "Sending" : "Send message"}
               </Button>
+              {submitError ? (
+                <p className="text-center font-sans text-[11px] text-red-300">
+                  {submitError}
+                </p>
+              ) : null}
               <p className="text-center font-sans text-[10px] uppercase tracking-[0.18em] text-saaq-ivory/30">
                 {SAAQ_CONTACT.responseNote}
               </p>

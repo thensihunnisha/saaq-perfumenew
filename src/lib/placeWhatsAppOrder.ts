@@ -1,6 +1,5 @@
 import {
   buildCartOrderMessage,
-  buildProductOrderMessage,
   getWhatsAppUrl,
   type WhatsAppOrderItem,
 } from "@/lib/whatsapp";
@@ -11,13 +10,9 @@ function withOrderId(message: string, orderId: number | string) {
 
 export async function placeWhatsAppOrder(
   items: WhatsAppOrderItem[],
-  kind: "product" | "cart"
+  _kind: "product" | "cart"
 ): Promise<string> {
-  const firstItem = items[0];
-  const message =
-    kind === "cart" || !firstItem
-      ? buildCartOrderMessage(items)
-      : buildProductOrderMessage(firstItem);
+  const message = buildCartOrderMessage(items);
 
   const persistable = items.filter(
     (item) => item.id && /^\d+$/.test(item.id) && item.quantity >= 1

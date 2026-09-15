@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Layers,
   LogOut,
+  Mail,
   Menu,
   Package,
   ShoppingBag,
@@ -31,6 +32,7 @@ const NAV_ITEMS = [
   { href: "/admin/collections", label: "Collections", icon: Layers },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
   { href: "/admin/customers", label: "Customers", icon: Users },
+  { href: "/admin/messages", label: "Messages", icon: Mail },
   { label: "Payments", icon: CreditCard },
 ] as const;
 

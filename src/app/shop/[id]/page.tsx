@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { getProduct } from "@/lib/api";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { useCart } from "@/context/CartContext";
+import { getOrderTotals } from "@/lib/orderTotals";
 import type { Product } from "@/data/products";
 
 export default function ProductDetailsPage() {
@@ -104,6 +105,14 @@ export default function ProductDetailsPage() {
 
   const collectionName =
     product.collection === "takeoff" ? "Take Off Collection" : "Gems Collection";
+  const { total } = getOrderTotals([
+    {
+      id: product.id,
+      collection: product.collection,
+      price: product.price,
+      quantity,
+    },
+  ]);
 
   return (
     <div className="min-h-screen bg-[#080808] pt-[var(--saaq-header-offset)] text-white">
@@ -230,7 +239,7 @@ export default function ProductDetailsPage() {
               </span>
 
               <span className="font-['Inter',sans-serif] text-lg tracking-wider text-white">
-                AED {(product.price * quantity).toFixed(2)}
+                AED {total.toFixed(2)}
               </span>
             </div>
 

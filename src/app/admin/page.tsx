@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Layers,
+  Mail,
   Package,
   PackagePlus,
   ShoppingBag,
@@ -51,6 +52,12 @@ const SALES_LINKS = [
     title: "Customers",
     label: "Manage customer accounts",
     icon: Users,
+  },
+  {
+    href: "/admin/messages",
+    title: "Messages",
+    label: "Read customer messages",
+    icon: Mail,
   },
 ] as const;
 

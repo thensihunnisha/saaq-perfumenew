@@ -7,11 +7,13 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import type { Product } from "@/data/products";
 
 const CART_STORAGE_KEY = "saaq-cart";
+const EMPTY_CART: CartItem[] = [];
 
 export type CartItem = {
   id: string;
@@ -43,20 +45,21 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-function readCart(): CartItem[] {
-  if (typeof window === "undefined") {
-    return [];
+let memoryItems: CartItem[] = EMPTY_CART;
+let memoryRaw: string | null = null;
+let canReadClientCart = false;
+const listeners = new Set<() => void>();
+
+function parseCart(raw: string | null): CartItem[] {
+  if (!raw) {
+    return EMPTY_CART;
   }
 
   try {
-    const stored = localStorage.getItem(CART_STORAGE_KEY);
-    if (!stored) {
-      return [];
-    }
+    const parsed = JSON.parse(raw) as CartItem[];
 
-    const parsed = JSON.parse(stored) as CartItem[];
     if (!Array.isArray(parsed)) {
-      return [];
+      return EMPTY_CART;
     }
 
     return parsed.map((item) => ({
@@ -64,31 +67,86 @@ function readCart(): CartItem[] {
       category: item.category || item.collection,
     }));
   } catch {
-    return [];
+    return EMPTY_CART;
   }
 }
 
+function emitCart() {
+  listeners.forEach((listener) => listener());
+}
+
+function readCartFromStorage(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(CART_STORAGE_KEY);
+
+    if (raw === memoryRaw) {
+      return memoryItems;
+    }
+
+    memoryRaw = raw;
+    memoryItems = parseCart(raw);
+    return memoryItems;
+  } catch {
+    return memoryItems;
+  }
+}
+
+function subscribeToCart(listener: () => void) {
+  listeners.add(listener);
+
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === CART_STORAGE_KEY || event.key === null) {
+      memoryRaw = null;
+      readCartFromStorage();
+      listener();
+    }
+  };
+
+  window.addEventListener("storage", onStorage);
+
+  return () => {
+    listeners.delete(listener);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+
+function getCartSnapshot(): CartItem[] {
+  return canReadClientCart ? memoryItems : EMPTY_CART;
+}
+
+function getCartServerSnapshot(): CartItem[] {
+  return EMPTY_CART;
+}
+
+function writeCart(next: CartItem[]) {
+  memoryItems = next.length === 0 ? EMPTY_CART : next;
+  memoryRaw = JSON.stringify(memoryItems);
+
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, memoryRaw);
+  } catch {
+    // Private browsing or full storage should not break the bag in memory.
+  }
+
+  emitCart();
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const storedItems = useSyncExternalStore(
+    subscribeToCart,
+    getCartSnapshot,
+    getCartServerSnapshot
+  );
   const [isReady, setIsReady] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const items = isReady ? storedItems : EMPTY_CART;
 
   useEffect(() => {
-    setItems(readCart());
+    readCartFromStorage();
+    canReadClientCart = true;
     setIsReady(true);
+    emitCart();
   }, []);
-
-  useEffect(() => {
-    if (!isReady) {
-      return;
-    }
-
-    try {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-    } catch {
-      // Private browsing or full storage should not break the bag in memory.
-    }
-  }, [items, isReady]);
 
   const addItem = useCallback(
     (
@@ -96,31 +154,30 @@ export function CartProvider({ children }: { children: ReactNode }) {
       quantity = 1,
       options?: { openDrawer?: boolean }
     ) => {
-      setItems((current) => {
-        const existing = current.find((item) => item.id === product.id);
+      const current = readCartFromStorage();
+      const existing = current.find((item) => item.id === product.id);
 
-        if (existing) {
-          return current.map((item) =>
-            item.id === product.id
-              ? { ...item, quantity: item.quantity + quantity }
-              : item
-          );
-        }
-
-        return [
-          ...current,
-          {
-            id: product.id,
-            name: product.name,
-            collection: product.collection,
-            category: product.category,
-            price: product.price,
-            image: product.image,
-            description: product.description,
-            quantity,
-          },
-        ];
-      });
+      writeCart(
+        existing
+          ? current.map((item) =>
+              item.id === product.id
+                ? { ...item, quantity: item.quantity + quantity }
+                : item
+            )
+          : [
+              ...current,
+              {
+                id: product.id,
+                name: product.name,
+                collection: product.collection,
+                category: product.category,
+                price: product.price,
+                image: product.image,
+                description: product.description,
+                quantity,
+              },
+            ]
+      );
 
       if (options?.openDrawer !== false) {
         setIsDrawerOpen(true);
@@ -130,7 +187,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
-    setItems((current) =>
+    const current = readCartFromStorage();
+    writeCart(
       quantity <= 0
         ? current.filter((item) => item.id !== id)
         : current.map((item) =>
@@ -140,11 +198,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const removeItem = useCallback((id: string) => {
-    setItems((current) => current.filter((item) => item.id !== id));
+    writeCart(readCartFromStorage().filter((item) => item.id !== id));
   }, []);
 
   const clearCart = useCallback(() => {
-    setItems([]);
+    writeCart(EMPTY_CART);
   }, []);
 
   const value = useMemo<CartContextValue>(

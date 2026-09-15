@@ -1,13 +1,13 @@
 export const SAAQ_CONTACT = {
   brand: "SAAQ PERFUME",
-  email: "info@saaqperfume.com",
+  email: "sadiqmm987@gmail.com",
   phone: {
     display: "+971 52 911 7712",
     tel: "+971529117712",
   },
   whatsapp: {
-    number: "971529117712",
-    display: "+971 52 911 7712",
+    number: "971527650021",
+    display: "+971 52 765 0021",
   },
   location: {
     city: "Dubai",
@@ -23,8 +23,8 @@ export const SAAQ_CONTACT = {
   ],
   social: {
     instagram: {
-      handle: "@saaqperfume",
-      url: "https://www.instagram.com/saaqperfume",
+      handle: "@saaqperfumes",
+      url: "https://www.instagram.com/saaqperfumes/",
     },
     facebook: {
       url: "https://www.facebook.com/",

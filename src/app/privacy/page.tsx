@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import LegalPage from "@/components/legal/LegalPage";
+import { SAAQ_CONTACT } from "@/config/contact";
 
 export const metadata: Metadata = {
   title: "Privacy Policy | SAAQ PERFUME",
@@ -27,7 +28,7 @@ export default function PrivacyPage() {
         },
         {
           heading: "Questions",
-          body: "For privacy questions, write to info@saaqperfume.com or use the contact page.",
+          body: `For privacy questions, write to ${SAAQ_CONTACT.email} or use the contact page.`,
         },
       ]}
     />
