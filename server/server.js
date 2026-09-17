@@ -54,6 +54,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/contact", contactRoutes);
 
-app.listen(port, () => {
-  console.log(`SAAQ API running on http://localhost:${port}`);
+
+app.listen(port, "0.0.0.0", () => {
+  console.log(`SAAQ API running on port ${port}`);
 });
