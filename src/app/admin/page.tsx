@@ -125,7 +125,7 @@ export default async function AdminDashboardPage() {
       <div className="flex flex-col gap-4 border-b border-saaq-gold/15 pb-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="saaq-eyebrow">SAAQ Perfume</p>
-          <h1 className="mt-3 font-display text-4xl text-saaq-ivory lg:text-5xl">
+          <h1 className="mt-3 font-display text-3xl text-saaq-ivory sm:text-4xl lg:text-5xl">
             Dashboard
           </h1>
           <p className="saaq-body mt-4 max-w-xl">

@@ -172,7 +172,7 @@ export default function ContactView() {
             href={chatHref}
             target="_blank"
             rel="noopener noreferrer"
-            className="saaq-transition mt-12 inline-flex items-center justify-center border border-[#25D366]/40 bg-[#25D366]/10 px-8 py-4 font-sans text-[10px] uppercase tracking-[0.28em] text-[#25D366] hover:border-[#25D366] hover:bg-[#25D366] hover:text-white"
+            className="saaq-transition mt-12 inline-flex w-full items-center justify-center border border-[#25D366]/40 bg-[#25D366]/10 px-8 py-4 font-sans text-[10px] uppercase tracking-[0.22em] text-[#25D366] hover:border-[#25D366] hover:bg-[#25D366] hover:text-white sm:w-auto sm:tracking-[0.28em]"
           >
             Chat with SAAQ
           </a>

@@ -27,12 +27,12 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
               a signature.
             </Body>
           </div>
-          <ButtonLink href="/collection" variant="ghost" size="sm">
+          <ButtonLink href="/collection" variant="ghost" size="sm" className="w-full text-center sm:w-auto">
             View All
           </ButtonLink>
         </Reveal>
 
-        <div className="mt-14 grid grid-cols-1 gap-x-4 gap-y-10 min-[360px]:grid-cols-2 md:grid-cols-4 md:gap-x-6">
+        <div className="mt-14 grid grid-cols-1 gap-x-4 gap-y-10 min-[480px]:grid-cols-2 md:grid-cols-4 md:gap-x-6">
           {products.length > 0 ? (
             products.map((product, index) => (
               <Reveal key={product.id} delay={index * 80}>

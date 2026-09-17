@@ -51,7 +51,7 @@ export default function CartPageView() {
           <Body className="mx-auto mt-5 max-w-sm">
             Begin with a signature fragrance from the SAAQ collection.
           </Body>
-          <ButtonLink href="/collection" className="mt-10">
+          <ButtonLink href="/collection" className="mt-10 w-full text-center sm:w-auto">
             Discover SAAQ collection
           </ButtonLink>
         </div>

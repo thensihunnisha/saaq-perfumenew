@@ -37,6 +37,14 @@ const COLLECTION_LINKS = [
   },
 ] as const;
 
+const MOBILE_COLLECTION_LINKS = [
+  { href: "/collection", label: "All Collection" },
+  { href: "/collection/gems", label: "Gems Collection" },
+  { href: "/collection/takeoff", label: "Take Off Collection" },
+] as const;
+
+const MOBILE_COLLECTION_PANEL_ID = "mobile-collection-submenu";
+
 export default function Header() {
   const pathname = usePathname();
   const { itemCount, isReady: cartReady, openDrawer } = useCart();
@@ -46,7 +54,8 @@ export default function Header() {
 
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [collectionOpen, setCollectionOpen] = useState(false);
+  const [desktopCollectionOpen, setDesktopCollectionOpen] = useState(false);
+  const [mobileCollectionOpen, setMobileCollectionOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
   const collectionRef = useRef<HTMLDivElement>(null);
@@ -68,7 +77,8 @@ export default function Header() {
 
   const closeMenus = () => {
     setMenuOpen(false);
-    setCollectionOpen(false);
+    setDesktopCollectionOpen(false);
+    setMobileCollectionOpen(false);
   };
 
   const cancelClose = () => {
@@ -81,7 +91,7 @@ export default function Header() {
   const scheduleClose = () => {
     cancelClose();
     closeTimer.current = window.setTimeout(() => {
-      setCollectionOpen(false);
+      setDesktopCollectionOpen(false);
     }, 180);
   };
 
@@ -120,19 +130,24 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    const onPointerDown = (event: MouseEvent) => {
-      if (
-        collectionRef.current &&
-        !collectionRef.current.contains(event.target as Node)
-      ) {
-        setCollectionOpen(false);
+    const onPointerDown = (event: PointerEvent) => {
+      if (menuOpen) {
+        return;
       }
+
+      const target = event.target as Node | null;
+
+      if (collectionRef.current?.contains(target)) {
+        return;
+      }
+
+      setDesktopCollectionOpen(false);
     };
 
-    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("pointerdown", onPointerDown);
 
-    return () => document.removeEventListener("mousedown", onPointerDown);
-  }, []);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [menuOpen]);
 
   useEffect(() => {
     const lock = menuOpen || searchOpen;
@@ -157,7 +172,7 @@ export default function Header() {
         <AnnouncementBar />
         <nav
           className={cn(
-            "saaq-transition relative flex h-16 items-center justify-between px-4 sm:h-20 sm:px-8 lg:px-10 xl:px-12",
+            "saaq-transition relative flex h-16 min-w-0 items-center justify-between gap-2 px-3 sm:h-20 sm:gap-3 sm:px-8 lg:px-10 xl:px-12",
             isTransparent
               ? "border-b border-transparent bg-transparent"
               : "border-b border-saaq-gold/20 bg-saaq-black/92 backdrop-blur-xl"
@@ -183,20 +198,30 @@ export default function Header() {
             <div
               ref={collectionRef}
               className="relative"
-              onMouseEnter={() => {
+              onPointerEnter={(event) => {
+                if (event.pointerType !== "mouse") {
+                  return;
+                }
+
                 cancelClose();
-                setCollectionOpen(true);
+                setDesktopCollectionOpen(true);
               }}
-              onMouseLeave={scheduleClose}
+              onPointerLeave={(event) => {
+                if (event.pointerType !== "mouse") {
+                  return;
+                }
+
+                scheduleClose();
+              }}
             >
               <button
                 type="button"
-                aria-expanded={collectionOpen}
+                aria-expanded={desktopCollectionOpen}
                 aria-haspopup="true"
-                onClick={() => setCollectionOpen((open) => !open)}
+                onClick={() => setDesktopCollectionOpen((open) => !open)}
                 className={cn(
                   "saaq-transition flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-[0.22em] xl:text-[11px]",
-                  collectionOpen || pathname.startsWith("/collection")
+                  desktopCollectionOpen || pathname.startsWith("/collection")
                     ? "text-saaq-gold"
                     : "text-saaq-ivory/85 hover:text-saaq-gold"
                 )}
@@ -207,7 +232,7 @@ export default function Header() {
                   strokeWidth={1.4}
                   className={cn(
                     "saaq-transition",
-                    collectionOpen ? "rotate-180 text-saaq-gold" : ""
+                    desktopCollectionOpen ? "rotate-180 text-saaq-gold" : ""
                   )}
                 />
               </button>
@@ -215,7 +240,7 @@ export default function Header() {
               <div
                 className={cn(
                   "saaq-transition absolute left-1/2 top-[calc(100%+1.25rem)] z-[60] w-[min(92vw,34rem)] -translate-x-1/2 border border-saaq-gold/20 bg-saaq-black/96 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl",
-                  collectionOpen
+                  desktopCollectionOpen
                     ? "visible translate-y-0 opacity-100"
                     : "invisible -translate-y-2 pointer-events-none opacity-0"
                 )}
@@ -280,7 +305,7 @@ export default function Header() {
             ))}
           </div>
 
-          <div className="relative z-20 ml-auto flex items-center gap-1 sm:gap-2">
+          <div className="relative z-20 ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2">
             <button
               type="button"
               aria-label="Search"
@@ -326,9 +351,11 @@ export default function Header() {
               type="button"
               aria-label={menuOpen ? "Close menu" : "Open menu"}
               aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
               onClick={() => {
                 setSearchOpen(false);
-                setCollectionOpen(false);
+                setDesktopCollectionOpen(false);
+                setMobileCollectionOpen(false);
                 setMenuOpen((open) => !open);
               }}
               className="saaq-transition flex h-10 w-10 items-center justify-center text-saaq-ivory hover:text-saaq-gold lg:hidden"
@@ -343,56 +370,87 @@ export default function Header() {
         </nav>
 
         <div
+          id="mobile-navigation"
           className={cn(
-            "saaq-transition fixed inset-x-0 top-[var(--saaq-header-offset)] z-40 h-[calc(100dvh-var(--saaq-header-offset))] overflow-y-auto bg-saaq-black/98 lg:hidden",
+            "fixed inset-x-0 top-[var(--saaq-header-offset)] z-[45] h-[calc(100dvh-var(--saaq-header-offset))] overflow-y-auto overscroll-contain bg-saaq-black duration-300 ease-out lg:hidden",
             menuOpen
-              ? "visible opacity-100"
+              ? "visible pointer-events-auto opacity-100"
               : "invisible pointer-events-none opacity-0"
           )}
         >
-          <div className="flex flex-col px-5 py-8 sm:px-7">
+          <nav aria-label="Mobile" className="flex flex-col px-5 py-8 sm:px-7">
             <MobileLink href="/" label="Home" onClick={closeMenus} active={pathname === "/"} />
 
             <div className="border-b border-white/10">
               <button
                 type="button"
-                aria-expanded={collectionOpen}
-                onClick={() => setCollectionOpen((open) => !open)}
-                className="flex w-full items-center justify-between py-5 font-sans text-[11px] uppercase tracking-[0.25em] text-saaq-ivory"
+                id="mobile-collection-trigger"
+                aria-expanded={mobileCollectionOpen}
+                aria-controls={MOBILE_COLLECTION_PANEL_ID}
+                aria-haspopup="true"
+                onPointerDown={(event) => {
+                  event.stopPropagation();
+                }}
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setMobileCollectionOpen((open) => !open);
+                }}
+                className={cn(
+                  "flex min-h-12 w-full touch-manipulation items-center justify-between py-5 text-left font-sans text-[11px] uppercase tracking-[0.25em]",
+                  mobileCollectionOpen || pathname.startsWith("/collection")
+                    ? "text-saaq-gold"
+                    : "text-saaq-ivory"
+                )}
               >
                 Collection
                 <ChevronDown
                   size={15}
+                  strokeWidth={1.4}
+                  aria-hidden="true"
                   className={cn(
-                    "saaq-transition",
-                    collectionOpen ? "rotate-180 text-saaq-gold" : ""
+                    "saaq-transition shrink-0",
+                    mobileCollectionOpen ? "rotate-180 text-saaq-gold" : ""
                   )}
                 />
               </button>
 
               <div
+                id={MOBILE_COLLECTION_PANEL_ID}
+                role="region"
+                aria-label="Collection"
+                aria-labelledby="mobile-collection-trigger"
+                {...(!mobileCollectionOpen ? { inert: true } : {})}
                 className={cn(
-                  "saaq-transition overflow-hidden",
-                  collectionOpen ? "max-h-64 pb-4 opacity-100" : "max-h-0 opacity-0"
+                  "relative z-10 overflow-hidden transition-[max-height] duration-300 ease-out",
+                  mobileCollectionOpen
+                    ? "pointer-events-auto max-h-80 pb-3"
+                    : "pointer-events-none max-h-0"
                 )}
               >
-                {COLLECTION_LINKS.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={closeMenus}
-                    className="block py-2.5 pl-4 font-sans text-[10px] uppercase tracking-[0.22em] text-saaq-ivory/55 hover:text-saaq-gold"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                <Link
-                  href="/collection"
-                  onClick={closeMenus}
-                  className="block py-2.5 pl-4 font-sans text-[10px] uppercase tracking-[0.22em] text-saaq-gold"
-                >
-                  View All Collections
-                </Link>
+                <div className="flex flex-col">
+                  {MOBILE_COLLECTION_LINKS.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      tabIndex={mobileCollectionOpen ? 0 : -1}
+                      onPointerDown={(event) => {
+                        event.stopPropagation();
+                      }}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                      }}
+                      className={cn(
+                        "flex min-h-11 w-full touch-manipulation items-center py-2.5 pl-4 font-sans text-[10px] uppercase tracking-[0.22em]",
+                        pathname === item.href
+                          ? "text-saaq-gold"
+                          : "text-saaq-ivory/55 hover:text-saaq-gold"
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -405,7 +463,14 @@ export default function Header() {
                 active={pathname === link.href}
               />
             ))}
-          </div>
+
+            <MobileLink
+              href="/cart"
+              label="Cart"
+              onClick={closeMenus}
+              active={pathname === "/cart"}
+            />
+          </nav>
         </div>
       </header>
 
@@ -449,7 +514,7 @@ function MobileLink({
       href={href}
       onClick={onClick}
       className={cn(
-        "border-b border-white/10 py-5 font-sans text-[11px] uppercase tracking-[0.25em]",
+        "flex min-h-12 w-full items-center border-b border-white/10 py-5 font-sans text-[11px] uppercase tracking-[0.25em]",
         active ? "text-saaq-gold" : "text-saaq-ivory"
       )}
     >

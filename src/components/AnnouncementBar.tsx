@@ -30,18 +30,18 @@ export default function AnnouncementBar() {
       </span>
       <span
         aria-hidden="true"
-        className="saaq-announce-track h-9 items-center font-sans text-[9px] font-semibold uppercase tracking-[0.28em] sm:text-[10px]"
+        className="saaq-announce-track h-9 items-center font-sans text-[9px] font-semibold uppercase tracking-[0.18em] sm:text-[10px] sm:tracking-[0.28em]"
       >
         <span className="flex items-center">
           {Array.from({ length: 4 }, (_, index) => (
-            <span key={`a-${index}`} className="flex shrink-0 items-center px-8">
+            <span key={`a-${index}`} className="flex shrink-0 items-center px-5 sm:px-8">
               {copy}
             </span>
           ))}
         </span>
         <span className="flex items-center" aria-hidden="true">
           {Array.from({ length: 4 }, (_, index) => (
-            <span key={`b-${index}`} className="flex shrink-0 items-center px-8">
+            <span key={`b-${index}`} className="flex shrink-0 items-center px-5 sm:px-8">
               {copy}
             </span>
           ))}

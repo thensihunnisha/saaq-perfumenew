@@ -132,7 +132,7 @@ export default function ProductDetailsPage() {
 
       {/* PRODUCT */}
       <section className="mx-auto max-w-7xl px-6 py-10 lg:py-16">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
+        <div className="grid min-w-0 grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-20">
           {/* PRODUCT IMAGE */}
           <div className="relative">
             <div className="relative aspect-square overflow-hidden bg-[#111]">
@@ -296,7 +296,7 @@ export default function ProductDetailsPage() {
       {/* FRAGRANCE STORY */}
       <section className="border-t border-white/10 bg-[#0b0b0b]">
         <div className="mx-auto max-w-4xl px-6 py-16 text-center lg:py-20">
-          <p className="font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.45em] text-[#d4af37]">
+          <p className="font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.22em] text-[#d4af37] sm:tracking-[0.45em]">
             THE ART OF FRAGRANCE
           </p>
 
@@ -320,7 +320,7 @@ export default function ProductDetailsPage() {
               ? "/shop?collection=takeoff"
               : "/shop?collection=gems"
           }
-          className="inline-flex items-center gap-3 border border-white/20 px-7 py-3 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.3em] text-white/60 transition-all duration-300 hover:border-[#d4af37] hover:text-[#d4af37]"
+          className="inline-flex w-full max-w-xs items-center justify-center gap-3 border border-white/20 px-7 py-3 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.22em] text-white/60 transition-all duration-300 hover:border-[#d4af37] hover:text-[#d4af37] sm:w-auto sm:tracking-[0.3em]"
         >
           <ArrowLeft size={13} />
           Explore {product.collection === "takeoff" ? "Take Off" : "Gems"}

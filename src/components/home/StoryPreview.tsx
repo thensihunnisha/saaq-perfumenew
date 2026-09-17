@@ -36,7 +36,7 @@ export default function StoryPreview() {
               arrival. Rooted in Arabian perfumery and composed for a modern
               life, every bottle is an invitation to leave a signature.
             </Body>
-            <ButtonLink href="/story" variant="outline" className="mt-10">
+            <ButtonLink href="/story" variant="outline" className="mt-10 w-full text-center sm:w-auto">
               Discover Our Story
             </ButtonLink>
           </Reveal>

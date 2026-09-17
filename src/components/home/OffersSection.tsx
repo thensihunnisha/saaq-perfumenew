@@ -35,7 +35,7 @@ export default function OffersSection() {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-24 h-64 w-[36rem] -translate-x-1/2 rounded-full bg-saaq-gold/10 blur-[90px]"
+        className="pointer-events-none absolute left-1/2 top-24 h-64 w-[min(36rem,100%)] -translate-x-1/2 rounded-full bg-saaq-gold/10 blur-[90px]"
       />
       <div
         aria-hidden

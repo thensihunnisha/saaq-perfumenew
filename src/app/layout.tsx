@@ -23,6 +23,12 @@ export const metadata: Metadata = {
     "SAAQ PERFUME — Where Arabian heritage meets modern sophistication.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover" as const,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,7 +42,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body
-        className="bg-saaq-black font-sans text-saaq-ivory antialiased"
+        className="min-w-0 overflow-x-clip bg-saaq-black font-sans text-saaq-ivory antialiased"
         suppressHydrationWarning
       >
         <Providers>

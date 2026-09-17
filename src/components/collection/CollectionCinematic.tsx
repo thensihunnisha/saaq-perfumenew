@@ -15,10 +15,10 @@ export default function CollectionCinematic() {
           priority
           unoptimized
           sizes="100vw"
-          className="object-cover object-center sm:object-[center_right]"
+          className="object-cover object-[center_35%] sm:object-[center_right]"
         />
 
-        <div className="relative z-10 flex h-full items-center px-6 pt-24 sm:px-12 lg:px-20">
+        <div className="relative z-10 flex h-full items-end px-5 pb-16 pt-24 sm:items-center sm:px-12 sm:pb-0 lg:px-20">
           <div className="max-w-xl">
             <p className="saaq-hero-rise font-sans text-[11px] uppercase tracking-[0.32em] text-saaq-gold drop-shadow-[0_6px_18px_rgba(0,0,0,0.85)]">
               SAAQ PERFUME

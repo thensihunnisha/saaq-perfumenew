@@ -27,7 +27,7 @@ export default function TakeOffOfferNote({
         compact ? "px-4 py-3" : "px-5 py-4"
       )}
     >
-      <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-gold">
+      <p className="font-sans text-[10px] uppercase tracking-[0.18em] text-saaq-gold sm:tracking-[0.28em]">
         {copy.eyebrow}
       </p>
       <p

@@ -95,7 +95,7 @@ export default function CollectionWorld({
         </Container>
       </Section>
 
-      <section className="relative overflow-hidden">
+      <section className="relative min-h-[22rem] overflow-hidden">
         <Image
           src={content.heroImage}
           alt=""
@@ -111,7 +111,7 @@ export default function CollectionWorld({
               {content.ctaTitle}
             </DisplayHeading>
             <Body className="mx-auto mt-5 max-w-md">{content.ctaBody}</Body>
-            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <div className="mt-10 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
               <ButtonLink href={content.ctaHref} className="w-full text-center sm:w-auto">{content.ctaLabel}</ButtonLink>
               <ButtonLink
                 href={isGems ? "/collection/takeoff" : "/collection/gems"}

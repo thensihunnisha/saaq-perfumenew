@@ -136,7 +136,7 @@ export default function ProductDetailView({
             </div>
 
             <div className="mt-8 flex max-w-lg flex-col gap-3">
-              <Button type="button" size="lg" onClick={handleAddToCart}>
+              <Button type="button" size="lg" className="w-full" onClick={handleAddToCart}>
                 Add to cart
               </Button>
 

@@ -44,6 +44,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -54,11 +55,13 @@ html {
 
 body {
   margin: 0;
+  min-width: 0;
   background: var(--saaq-black);
   color: var(--saaq-ivory);
   font-family: var(--font-sans);
   font-size: 0.9375rem;
   line-height: 1.7;
+  overflow-x: clip;
   overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -164,7 +167,8 @@ video {
   width: 100%;
   max-width: var(--saaq-max);
   margin-inline: auto;
-  padding-inline: 1.25rem;
+  padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
 }
 
 .saaq-section {
@@ -173,6 +177,7 @@ video {
 
 .saaq-page {
   min-height: 100vh;
+  min-width: 0;
   padding-top: var(--saaq-header-offset);
   background: var(--saaq-black);
   color: var(--saaq-ivory);

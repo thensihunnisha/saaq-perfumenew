@@ -61,7 +61,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             src={product.image}
             alt={product.name}
             fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            sizes="(max-width: 479px) 100vw, (max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover saaq-img-zoom"
           />
         </Link>

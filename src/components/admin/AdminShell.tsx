@@ -171,7 +171,7 @@ export default function AdminShell({ children }: AdminShellProps) {
         </div>
       </aside>
 
-      <div className="flex min-h-screen min-w-0 flex-col md:pl-20 lg:pl-72">
+      <div className="flex min-h-screen min-w-0 flex-col overflow-x-clip md:pl-20 lg:pl-72">
         <header className="flex h-16 items-center justify-between border-b border-saaq-gold/15 bg-saaq-black/90 px-4 backdrop-blur-xl md:hidden">
           <button
             type="button"

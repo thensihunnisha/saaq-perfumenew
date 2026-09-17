@@ -17,7 +17,8 @@ const SLIDES = [
     line: "The Art of Signature Fragrance",
     body: "Fragrance is not simply worn. It becomes your signature — an expression of presence, character, and unforgettable elegance.",
     image: "/images/banners/saaq-home-hero.png",
-    imageClassName: "object-[82%_center] sm:object-[78%_50%] lg:object-[82%_55%]",
+    imageClassName:
+      "object-[88%_78%] sm:object-[78%_50%] lg:object-[82%_55%]",
     href: "/collection",
     cta: "Explore Collection",
     secondaryHref: "/story",
@@ -122,10 +123,11 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-[88%] bg-gradient-to-r from-black/85 via-black/50 to-transparent sm:w-[58%] sm:from-black/80 sm:via-black/45" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/30 sm:hidden" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-[58%] bg-gradient-to-r from-black/80 via-black/45 to-transparent sm:block" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
 
-      <div className="relative z-20 flex h-full items-center px-5 pb-20 pt-20 sm:px-10 sm:pb-0 sm:pt-16 md:px-16 lg:px-24">
+      <div className="relative z-20 flex h-full items-start px-5 pb-24 pt-[calc(var(--saaq-header-offset)+0.75rem)] sm:items-center sm:px-10 sm:pb-0 sm:pt-16 md:px-16 lg:px-24">
         <div className="max-w-xl min-w-0 lg:max-w-2xl" aria-live="polite">
           <div className="mb-5 flex items-center gap-3">
             <Sparkles size={13} strokeWidth={1} className="shrink-0 text-saaq-gold" />
@@ -143,7 +145,7 @@ export default function Hero() {
 
           <div className="mt-5 h-px w-24 bg-gradient-to-r from-saaq-gold to-transparent" />
 
-          <p className="mt-6 max-w-lg text-pretty font-display text-xl leading-[1.25] text-saaq-ivory drop-shadow-[0_6px_18px_rgba(0,0,0,0.7)] sm:text-3xl lg:text-[40px]">
+          <p className="mt-5 max-w-lg text-pretty font-display text-lg leading-[1.25] text-saaq-ivory drop-shadow-[0_6px_18px_rgba(0,0,0,0.7)] sm:mt-6 sm:text-3xl lg:text-[40px]">
             {slide.line}
           </p>
 
@@ -153,7 +155,7 @@ export default function Hero() {
             </Body>
           </div>
 
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap">
             <ButtonLink href={slide.href} size="lg" className="w-full text-center sm:w-auto">
               {slide.cta}
             </ButtonLink>

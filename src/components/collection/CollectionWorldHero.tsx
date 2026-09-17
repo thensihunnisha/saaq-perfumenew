@@ -33,10 +33,11 @@ export default function CollectionWorldHero({
           priority
           unoptimized
           sizes="100vw"
-          className="object-cover object-center"
+          className="object-cover object-[center_30%] sm:object-center"
         />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/55 lg:bg-gradient-to-r lg:from-black/45 lg:via-transparent lg:to-transparent" />
 
-        <div className="relative z-10 flex h-full items-center justify-center px-6 pt-24 text-center sm:px-12 lg:w-[42%] lg:px-16 lg:pt-16">
+        <div className="relative z-10 flex h-full items-end justify-center px-5 pb-16 pt-24 text-center sm:items-center sm:px-12 sm:pb-0 lg:w-[42%] lg:justify-center lg:px-16 lg:pt-16">
           <div className="max-w-xl">
             <p className="saaq-hero-rise font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-gold sm:tracking-[0.38em]">
               {content.eyebrow}
@@ -80,7 +81,7 @@ export default function CollectionWorldHero({
             playsInline
             preload="metadata"
             poster={content.heroImage}
-            className="absolute inset-0 h-full w-full object-contain object-center"
+            className="absolute inset-0 h-full w-full object-cover object-center sm:object-[center_30%]"
           >
             <source src={content.heroVideo} type="video/mp4" />
           </video>
@@ -100,16 +101,16 @@ export default function CollectionWorldHero({
       <div
         className={
           content.heroVideo
-            ? "absolute inset-0 bg-gradient-to-t from-saaq-black/55 via-transparent to-black/15"
+            ? "absolute inset-0 bg-gradient-to-b from-black/75 via-black/15 to-saaq-black/55 sm:bg-gradient-to-t sm:from-saaq-black/55 sm:via-transparent sm:to-black/15"
             : "absolute inset-0 bg-gradient-to-r from-saaq-black via-saaq-black/55 to-transparent"
         }
       />
       {content.heroVideo ? null : (
         <div className="absolute inset-0 bg-gradient-to-t from-saaq-black via-transparent to-black/20" />
       )}
-      <div className="absolute -right-10 top-1/4 h-72 w-72 rounded-full bg-saaq-gold/10 blur-3xl" />
+      <div className="pointer-events-none absolute right-0 top-1/4 h-56 w-56 rounded-full bg-saaq-gold/10 blur-3xl sm:h-72 sm:w-72" />
 
-      <div className="relative z-10 flex h-full items-center justify-start px-5 pt-20 sm:px-12 lg:px-20">
+      <div className="relative z-10 flex h-full items-start px-5 pb-16 pt-[calc(var(--saaq-header-offset)+0.75rem)] sm:items-center sm:px-12 sm:pb-0 sm:pt-24 lg:px-20">
         <div className="max-w-2xl min-w-0">
           <p className="saaq-hero-rise font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-gold sm:tracking-[0.38em]">
             {content.eyebrow}

@@ -17,7 +17,7 @@ export default function StoreChrome({ children }: { children: ReactNode }) {
   return (
     <>
       <Header />
-      <main>
+      <main className="min-w-0">
         <PageTransition>{children}</PageTransition>
       </main>
       <Footer />

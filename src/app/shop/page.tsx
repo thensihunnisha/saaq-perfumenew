@@ -78,7 +78,7 @@ function ShopContent() {
   return (
     <div className="min-h-screen bg-[#080808] pt-[var(--saaq-header-offset)] text-white">
       {/* HERO */}
-      <section className="relative flex min-h-[300px] items-center justify-center overflow-hidden">
+      <section className="relative flex min-h-[240px] items-center justify-center overflow-hidden sm:min-h-[300px]">
         <Image
           src={
             selectedCollection === "takeoff"
@@ -169,7 +169,7 @@ function ShopContent() {
 
         {/* PRODUCT GRID */}
         {filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-1 gap-x-5 gap-y-10 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-x-5 gap-y-10 min-[480px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
             {filteredProducts.map((product) => (
               <div
                 key={product.id}
@@ -186,7 +186,7 @@ function ShopContent() {
                       src={product.image}
                       alt={product.name}
                       fill
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      sizes="(max-width: 479px) 100vw, (max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
 
@@ -233,7 +233,7 @@ function ShopContent() {
               href="/shop"
               className="mt-6 inline-block border border-[#d4af37] px-6 py-3 font-['Inter',sans-serif] text-[9px] uppercase tracking-[0.25em] text-[#d4af37]"
             >
-              View All Fragrancesffghty
+              View All Fragrances
             </Link>
           </div>
         )}

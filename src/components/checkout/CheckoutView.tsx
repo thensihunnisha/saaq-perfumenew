@@ -122,7 +122,7 @@ export default function CheckoutView() {
           <Body className="mx-auto mt-5 max-w-sm">
             Add a fragrance before placing an order.
           </Body>
-          <ButtonLink href="/shop" className="mt-10">
+          <ButtonLink href="/shop" className="mt-10 w-full text-center sm:w-auto">
             Continue Shopping
           </ButtonLink>
         </div>
@@ -268,7 +268,7 @@ export default function CheckoutView() {
               <p className="font-sans text-xs text-red-300">{errors.cart}</p>
             ) : null}
 
-            <Button type="submit" size="lg" disabled={submitting}>
+            <Button type="submit" size="lg" className="w-full sm:w-auto" disabled={submitting}>
               {submitting ? "Placing order…" : "Place Order"}
             </Button>
           </form>
@@ -380,7 +380,7 @@ export default function CheckoutView() {
                 }
                 gold={totals.shipping === 0}
               />
-              <div className="flex items-end justify-between border-t border-white/10 pt-4">
+              <div className="flex flex-wrap items-end justify-between gap-3 border-t border-white/10 pt-4">
                 <span className="font-display text-xl">Grand total</span>
                 <span className="font-display text-2xl text-saaq-gold">
                   AED {totals.total.toFixed(2)}
@@ -415,9 +415,9 @@ function SummaryRow({
   gold?: boolean;
 }) {
   return (
-    <div className="flex justify-between text-saaq-ivory/60">
-      <span>{label}</span>
-      <span className={cn(gold && "text-saaq-gold")}>{value}</span>
+    <div className="flex justify-between gap-4 text-saaq-ivory/60">
+      <span className="min-w-0">{label}</span>
+      <span className={cn("shrink-0", gold && "text-saaq-gold")}>{value}</span>
     </div>
   );
 }
