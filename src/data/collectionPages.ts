@@ -24,6 +24,7 @@ export const gemsWorld: CollectionWorldContent = {
   title: "Gems",
   heroLine: "Precious. Rare. Unforgettable.",
   heroImage: "/images/collections/gemscollectionbanner2.jpg",
+  heroVideo: "/images/collections/kling_20260927_VIDEO_create_a_w_4721_0.mp4",
   theme: "gems",
   storyEyebrow: "The Collection Story",
   storyTitle: "Cut like a jewel. Worn like a secret.",

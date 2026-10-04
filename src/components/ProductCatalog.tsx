@@ -109,7 +109,7 @@ export default function ProductCatalog({
         </p>
 
         <div className="mt-10">
-          <ProductGrid products={visible} />
+          <ProductGrid products={visible} tone="light" />
         </div>
       </Container>
     </Section>

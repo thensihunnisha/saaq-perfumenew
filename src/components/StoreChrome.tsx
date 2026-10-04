@@ -1,19 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { usePathname } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import LuxuryCursor from "@/components/LuxuryCursor";
 import PageTransition from "@/components/PageTransition";
 
 export default function StoreChrome({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/admin");
-
-  if (isAdmin) {
-    return children;
-  }
-
   return (
     <>
       <Header />
@@ -21,6 +14,7 @@ export default function StoreChrome({ children }: { children: ReactNode }) {
         <PageTransition>{children}</PageTransition>
       </main>
       <Footer />
+      <LuxuryCursor />
     </>
   );
 }

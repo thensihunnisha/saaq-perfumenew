@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
-import { searchProducts, type Product } from "@/data/products";
-import { getProductHref, getProducts } from "@/lib/api";
+import { products, searchProducts } from "@/data/products";
+import { getProductHref } from "@/lib/api";
 
 type SearchOverlayProps = {
   open: boolean;
@@ -13,59 +13,26 @@ type SearchOverlayProps = {
 };
 
 export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
+  if (!open) {
+    return null;
+  }
+
+  return <SearchOverlayPanel onClose={onClose} />;
+}
+
+function SearchOverlayPanel({ onClose }: { onClose: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
-  const [catalog, setCatalog] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!open) {
-      setQuery("");
-      return;
-    }
-
     const frame = window.requestAnimationFrame(() => {
       inputRef.current?.focus();
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [open]);
+  }, []);
 
   useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    let cancelled = false;
-    setIsLoading(true);
-
-    getProducts()
-      .then((items) => {
-        if (!cancelled) {
-          setCatalog(items);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setCatalog([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -76,21 +43,17 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
     document.addEventListener("keydown", onKeyDown);
 
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose, open]);
+  }, [onClose]);
 
   const results = useMemo(
-    () => searchProducts(catalog, query),
-    [catalog, query]
+    () => searchProducts(products, query),
+    [query]
   );
   const hasQuery = query.trim().length > 0;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
   };
-
-  if (!open) {
-    return null;
-  }
 
   return (
     <div
@@ -141,10 +104,6 @@ export default function SearchOverlay({ open, onClose }: SearchOverlayProps) {
           {!hasQuery ? (
             <p className="font-display text-2xl text-saaq-ivory/45 sm:text-3xl">
               Begin typing to find a signature scent.
-            </p>
-          ) : isLoading ? (
-            <p className="font-display text-2xl text-saaq-ivory/45 sm:text-3xl">
-              Loading fragrances
             </p>
           ) : results.length === 0 ? (
             <p className="font-display text-2xl text-saaq-ivory sm:text-3xl">

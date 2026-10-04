@@ -283,6 +283,86 @@ video {
    Hero cinema
    -------------------------------------------------------------------------- */
 
+@keyframes saaq-hero-veil {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes saaq-hero-env {
+  from {
+    transform: scale(1.05);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes saaq-hero-product-in {
+  from {
+    transform: scale(1.05) translate3d(0, 18px, 0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes saaq-hero-line {
+  from {
+    transform: translate3d(0, 110%, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes saaq-scroll-line {
+  0% {
+    transform: scaleY(0);
+    transform-origin: top;
+    opacity: 0.2;
+  }
+  35% {
+    transform: scaleY(1);
+    transform-origin: top;
+    opacity: 1;
+  }
+  70% {
+    transform: scaleY(1);
+    transform-origin: bottom;
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(0);
+    transform-origin: bottom;
+    opacity: 0.2;
+  }
+}
+
+@keyframes saaq-page-veil {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
 @keyframes saaq-hero-rise {
   from {
     opacity: 0;
@@ -349,6 +429,104 @@ video {
   }
 }
 
+.saaq-hero-veil {
+  opacity: 1;
+}
+
+.saaq-hero-ready .saaq-hero-veil {
+  animation: saaq-hero-veil 0.9s var(--ease-saaq) 0.08s both;
+}
+
+.saaq-hero-ready .saaq-hero-env {
+  animation: saaq-hero-env 1.45s var(--ease-saaq) both;
+}
+
+.saaq-hero-ready .saaq-hero-product .saaq-hero-env {
+  animation: saaq-hero-env 1.45s var(--ease-saaq) both;
+}
+
+.saaq-hero-stage {
+  opacity: 0;
+}
+
+.saaq-hero-ready .saaq-hero-stage {
+  animation: saaq-hero-product-in 1.2s var(--ease-saaq) 0.16s both;
+}
+
+.saaq-hero-line {
+  overflow: hidden;
+}
+
+.saaq-hero-line span,
+.saaq-hero-line {
+  display: block;
+}
+
+.saaq-hero-ready .saaq-hero-line {
+  animation: saaq-hero-line 0.9s var(--ease-saaq) both;
+}
+
+.saaq-hero-ready .saaq-hero-line-1 {
+  animation-delay: 0.18s;
+}
+
+.saaq-hero-ready .saaq-hero-line-2 {
+  animation-delay: 0.3s;
+}
+
+.saaq-hero-ready .saaq-hero-line-3 {
+  animation-delay: 0.42s;
+}
+
+.saaq-hero-ready .saaq-hero-line-4 {
+  animation-delay: 0.54s;
+}
+
+.saaq-scroll-line {
+  display: block;
+  height: 2.75rem;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--saaq-gold), transparent);
+  animation: saaq-scroll-line 2.1s var(--ease-saaq) infinite;
+}
+
+.saaq-page-veil {
+  animation: saaq-page-veil 0.78s var(--ease-saaq) both;
+}
+
+.saaq-text-reveal-unit {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.saaq-text-reveal-inner {
+  display: inline-block;
+  transform: translate3d(0, 110%, 0);
+  opacity: 0;
+  transition:
+    transform 0.8s var(--ease-saaq),
+    opacity 0.8s var(--ease-saaq);
+  transition-delay: var(--saaq-reveal-delay, 0ms);
+}
+
+.saaq-text-reveal.is-visible .saaq-text-reveal-inner {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+}
+
+.saaq-text-reveal[class*="block"] .saaq-text-reveal-unit,
+.saaq-text-reveal .saaq-text-reveal-unit:has(+ .saaq-text-reveal-unit) {
+  display: inline-block;
+}
+
+html.saaq-luxury-cursor,
+html.saaq-luxury-cursor body,
+html.saaq-luxury-cursor a,
+html.saaq-luxury-cursor button {
+  cursor: none;
+}
+
 .saaq-hero-rise {
   animation: saaq-hero-rise 1.15s var(--ease-saaq) both;
 }
@@ -395,8 +573,29 @@ video {
   .saaq-hero-float,
   .saaq-hero-mist,
   .saaq-hero-orb,
-  .saaq-hero-scroll-icon {
+  .saaq-hero-scroll-icon,
+  .saaq-hero-ready .saaq-hero-veil,
+  .saaq-hero-ready .saaq-hero-env,
+  .saaq-hero-ready .saaq-hero-product,
+  .saaq-hero-ready .saaq-hero-stage,
+  .saaq-hero-ready .saaq-hero-line,
+  .saaq-scroll-line,
+  .saaq-page-veil {
     animation: none;
+  }
+
+  .saaq-hero-veil {
+    opacity: 0;
+  }
+
+  .saaq-hero-stage {
+    opacity: 1;
+  }
+
+  .saaq-text-reveal-inner {
+    transform: none;
+    opacity: 1;
+    transition: none;
   }
 }
 

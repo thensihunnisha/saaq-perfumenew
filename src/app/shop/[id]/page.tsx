@@ -5,75 +5,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Minus, Plus, ShoppingBag } from "lucide-react";
-import { useEffect, useState } from "react";
-import { getProduct } from "@/lib/api";
+import { useState } from "react";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { useCart } from "@/context/CartContext";
+import { getProductById } from "@/data/products";
 import { getOrderTotals } from "@/lib/orderTotals";
-import type { Product } from "@/data/products";
 
 export default function ProductDetailsPage() {
   const params = useParams();
   const { addItem } = useCart();
 
   const [quantity, setQuantity] = useState(1);
-  const [product, setProduct] = useState<Product | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
 
   const productId = String(params.id ?? "");
-
-  useEffect(() => {
-    if (!productId) {
-      setIsLoading(false);
-      return;
-    }
-
-    let cancelled = false;
-    setIsLoading(true);
-    setHasError(false);
-
-    getProduct(productId)
-      .then((item) => {
-        if (!cancelled) {
-          setProduct(item);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setHasError(true);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [productId]);
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#080808] px-6 text-white">
-        <p className="font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.28em] text-white/40">
-          Loading fragrance
-        </p>
-      </div>
-    );
-  }
-
-  if (hasError) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#080808] px-6 text-white">
-        <p className="font-['Inter',sans-serif] text-sm text-white/50">
-          Unable to load this fragrance. Please try again.
-        </p>
-      </div>
-    );
-  }
+  const product = getProductById(productId) ?? null;
 
   if (!product) {
     return (

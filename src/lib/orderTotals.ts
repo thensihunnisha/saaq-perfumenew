@@ -21,7 +21,7 @@ export type OrderTotals = {
   promotion: TakeOffPromotionResult;
 };
 
-export function getShipping(_subtotal?: number) {
+export function getShipping() {
   return 0;
 }
 
@@ -35,7 +35,7 @@ export function getOrderTotals(items: OrderTotalItem[]): OrderTotals {
     }))
   );
   const subtotal = promotion.subtotal;
-  const shipping = getShipping(subtotal);
+  const shipping = getShipping();
 
   return {
     subtotal,

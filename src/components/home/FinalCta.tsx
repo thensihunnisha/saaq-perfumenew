@@ -1,32 +1,28 @@
 import Image from "next/image";
-import Reveal from "@/components/Reveal";
-import { ButtonLink, DisplayHeading } from "@/components/ui";
+import { ButtonLink } from "@/components/ui";
+import { SlideUp } from "@/components/motion";
 
 export default function FinalCta() {
   return (
-    <section className="relative min-h-[70vh] overflow-hidden">
+    <section className="relative min-h-[100svh] overflow-hidden">
       <Image
         src="/images/collections/final-cta-home.jpg"
-        alt="SAAQ Emerald and Crystal"
+        alt=""
         fill
-        unoptimized
         sizes="100vw"
-        className="saaq-hero-media object-cover object-center"
+        className="object-cover object-center"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-saaq-black/70 via-saaq-black/25 to-transparent sm:bg-gradient-to-r sm:from-saaq-black/50 sm:via-saaq-black/15 sm:to-transparent" />
-
-      <div className="relative z-10 flex min-h-[70vh] items-center justify-start px-5 py-20 sm:px-10 sm:py-24 md:px-16 lg:px-24">
-        <Reveal className="max-w-xl text-left">
+      <div className="absolute inset-0 bg-saaq-black/60" />
+      <div className="relative z-10 flex min-h-[100svh] items-center justify-center px-5 py-24 text-center">
+        <SlideUp className="max-w-3xl">
           <p className="saaq-eyebrow">SAAQ</p>
-          <DisplayHeading as="h2" className="mt-6">
-            Leave your
-            <br />
-            signature.
-          </DisplayHeading>
+          <h2 className="mt-6 font-display text-[clamp(2.6rem,8vw,6.75rem)] leading-[0.88] tracking-[-0.03em] text-saaq-ivory">
+            Leave an impression.
+          </h2>
           <ButtonLink href="/collection" className="mt-10 w-full text-center sm:w-auto">
-            Explore Collection
+            Explore the Collection
           </ButtonLink>
-        </Reveal>
+        </SlideUp>
       </div>
     </section>
   );

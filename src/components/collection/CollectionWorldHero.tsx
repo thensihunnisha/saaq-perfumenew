@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { useRef } from "react";
 import { DisplayHeading } from "@/components/ui";
-import { cn } from "@/lib/cn";
 import type { CollectionWorldContent } from "@/data/collectionPages";
 import { useParallaxTransform } from "@/hooks/useParallaxTransform";
 
@@ -19,43 +18,9 @@ export default function CollectionWorldHero({
 
   useParallaxTransform(
     mediaRef,
-    isGems || content.heroVideo ? 0 : 0.28,
-    isGems || content.heroVideo ? 0 : 0.00022
+    content.heroVideo ? 0 : 0.28,
+    content.heroVideo ? 0 : 0.00022
   );
-
-  if (isGems) {
-    return (
-      <section className="relative h-[92svh] min-h-0 overflow-hidden bg-[#030303] sm:min-h-[640px]">
-        <Image
-          src={content.heroImage}
-          alt="Gems collection"
-          fill
-          priority
-          unoptimized
-          sizes="100vw"
-          className="object-cover object-[center_30%] sm:object-center"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/55 lg:bg-gradient-to-r lg:from-black/45 lg:via-transparent lg:to-transparent" />
-
-        <div className="relative z-10 flex h-full items-end justify-center px-5 pb-16 pt-24 text-center sm:items-center sm:px-12 sm:pb-0 lg:w-[42%] lg:justify-center lg:px-16 lg:pt-16">
-          <div className="max-w-xl">
-            <p className="saaq-hero-rise font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-gold sm:tracking-[0.38em]">
-              {content.eyebrow}
-            </p>
-            <DisplayHeading
-              as="h1"
-              className="saaq-hero-rise mt-5 italic saaq-hero-delay-1"
-            >
-              {content.title}
-            </DisplayHeading>
-            <p className="saaq-hero-rise mx-auto mt-6 max-w-md font-sans text-sm leading-7 text-saaq-ivory/90 saaq-hero-delay-3">
-              {content.heroLine}
-            </p>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section
@@ -65,38 +30,67 @@ export default function CollectionWorldHero({
           : "relative h-[92svh] min-h-0 overflow-hidden bg-saaq-black sm:min-h-[640px]"
       }
     >
-      <div
-        ref={mediaRef}
-        className={
-          content.heroVideo
-            ? "absolute inset-0"
-            : "absolute inset-[-14%] will-change-transform"
-        }
-      >
-        {content.heroVideo ? (
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster={content.heroImage}
-            className="absolute inset-0 h-full w-full object-cover object-center sm:object-[center_30%]"
-          >
-            <source src={content.heroVideo} type="video/mp4" />
-          </video>
-        ) : (
-          <Image
-            src={content.heroImage}
-            alt=""
-            fill
-            priority
-            unoptimized
-            sizes="100vw"
-            className="saaq-hero-media object-cover object-center sm:object-[center_30%]"
-          />
-        )}
-      </div>
+      {isGems ? (
+        <div className="absolute inset-x-0 bottom-0 top-[var(--saaq-header-offset)] flex items-center justify-center bg-[#030303]">
+          {content.heroVideo ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={content.heroImage}
+              aria-label="Gems collection"
+              className="h-full w-auto max-h-full max-w-full object-contain"
+            >
+              <source src={content.heroVideo} type="video/mp4" />
+            </video>
+          ) : (
+            <Image
+              src={content.heroImage}
+              alt="Gems collection"
+              width={1248}
+              height={1656}
+              priority
+              unoptimized
+              className="h-full w-auto max-h-full max-w-full object-contain"
+            />
+          )}
+        </div>
+      ) : (
+        <div
+          ref={mediaRef}
+          className={
+            content.heroVideo
+              ? "absolute inset-0"
+              : "absolute inset-[-14%] will-change-transform"
+          }
+        >
+          {content.heroVideo ? (
+            <video
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={content.heroImage}
+              className="absolute inset-0 h-full w-full object-cover object-center sm:object-[center_30%]"
+            >
+              <source src={content.heroVideo} type="video/mp4" />
+            </video>
+          ) : (
+            <Image
+              src={content.heroImage}
+              alt=""
+              fill
+              priority
+              unoptimized
+              sizes="100vw"
+              className="saaq-hero-media object-cover object-center sm:object-[center_30%]"
+            />
+          )}
+        </div>
+      )}
 
       <div
         className={

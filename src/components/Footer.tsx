@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
+import NewsletterForm from "@/components/NewsletterForm";
+import Reveal from "@/components/Reveal";
 import {
   getContactMailto,
   getContactTel,
-  getNewsletterMailto,
   SAAQ_CONTACT,
 } from "@/config/contact";
 import { getEnquiryWhatsAppUrl } from "@/lib/whatsapp";
@@ -28,7 +29,6 @@ const COLLECTIONS = [
 const CUSTOMER = [
   { href: "/cart", label: "Cart" },
   { href: "/wishlist", label: "Wishlist" },
-  { href: "/checkout", label: "Checkout" },
   { href: "/shipping", label: "Shipping & Returns" },
   { href: "/privacy", label: "Privacy Policy" },
   { href: "/terms", label: "Terms & Conditions" },
@@ -48,7 +48,7 @@ export default function Footer() {
     <footer className="border-t border-saaq-gold/20 bg-saaq-void text-saaq-ivory">
       <div className="h-px bg-gradient-to-r from-transparent via-saaq-gold to-transparent" />
 
-      <div className="saaq-container py-16 lg:py-24">
+      <Reveal className="saaq-container py-16 lg:py-24">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1.6fr)] lg:gap-20">
           <div>
             <Link
@@ -80,7 +80,12 @@ export default function Footer() {
               </SocialLink>
             </div>
 
-            <NewsletterForm />
+            <NewsletterForm
+              className="mt-12 max-w-md"
+              heading="Join the SAAQ world"
+              inputLabel="Email"
+              buttonLabel="Subscribe"
+            />
           </div>
 
           <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
@@ -149,7 +154,7 @@ export default function Footer() {
             </FooterGroup>
           </div>
         </div>
-      </div>
+      </Reveal>
 
       <div className="border-t border-white/10">
         <div className="saaq-container flex flex-col gap-5 py-6 lg:flex-row lg:items-center lg:justify-between">
@@ -246,115 +251,6 @@ function FooterLink({
         {children}
       </Link>
     </li>
-  );
-}
-
-function NewsletterForm() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
-    "idle"
-  );
-  const [message, setMessage] = useState("");
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const nextEmail = email.trim().toLowerCase();
-
-    if (!nextEmail) {
-      return;
-    }
-
-    setStatus("loading");
-    setMessage("");
-
-    try {
-      const response = await fetch("/api/newsletter", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ email: nextEmail }),
-      });
-      const payload = (await response.json()) as {
-        success?: boolean;
-        message?: string;
-      };
-
-      if (response.status === 400) {
-        setStatus("error");
-        setMessage(payload.message || "Enter a valid email.");
-        return;
-      }
-
-      if (!response.ok || !payload.success) {
-        throw new Error(payload.message || "Unable to join the list.");
-      }
-
-      setStatus("success");
-      setMessage(payload.message || "You are on the list. Welcome to SAAQ.");
-      setEmail("");
-    } catch (error) {
-      const fallback = getNewsletterMailto(nextEmail);
-
-      try {
-        window.location.assign(fallback);
-        setStatus("success");
-        setMessage("Opening your email to finish joining the SAAQ list.");
-        setEmail("");
-      } catch {
-        setStatus("error");
-        setMessage(
-          error instanceof Error
-            ? error.message
-            : "Unable to join the list right now."
-        );
-      }
-    }
-  };
-
-  return (
-    <div className="mt-12 max-w-md">
-      <p className="font-sans text-[10px] uppercase tracking-[0.28em] text-saaq-ivory/70">
-        Join the SAAQ world
-      </p>
-      {status === "success" ? (
-        <p className="mt-4 font-sans text-sm text-saaq-gold">{message}</p>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="mt-4 flex flex-col border border-white/15 sm:flex-row"
-        >
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(event) => {
-              setEmail(event.target.value);
-              if (status === "error") {
-                setStatus("idle");
-                setMessage("");
-              }
-            }}
-            placeholder="Email"
-            aria-label="Email"
-            autoComplete="email"
-            disabled={status === "loading"}
-            className="min-w-0 flex-1 bg-transparent px-4 py-3 font-sans text-sm text-saaq-ivory outline-none placeholder:text-saaq-ivory/30 disabled:opacity-60"
-          />
-          <button
-            type="submit"
-            disabled={status === "loading"}
-            className="saaq-transition bg-saaq-gold px-5 py-3 font-sans text-[10px] uppercase tracking-[0.2em] text-saaq-black hover:bg-saaq-gold-deep disabled:opacity-70 sm:py-0"
-          >
-            {status === "loading" ? "Joining" : "Subscribe"}
-          </button>
-        </form>
-      )}
-      {status === "error" && message ? (
-        <p className="mt-3 font-sans text-sm text-saaq-gold">{message}</p>
-      ) : null}
-    </div>
   );
 }
 

@@ -1,12 +1,11 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { getProducts } from "@/lib/api";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import type { Product } from "@/data/products";
+import { products } from "@/data/products";
 
 export default function ShopPage() {
   return (
@@ -22,36 +21,6 @@ export default function ShopPage() {
 
 function ShopContent() {
   const searchParams = useSearchParams();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    getProducts()
-      .then((items) => {
-        if (!cancelled) {
-          setProducts(items);
-          setHasError(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setHasError(true);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
   const collectionParam = searchParams.get("collection");
 
   const selectedCollection =
@@ -135,20 +104,6 @@ function ShopContent() {
 
       {/* PRODUCTS */}
       <section className="mx-auto max-w-7xl px-6 py-10">
-        {isLoading ? (
-          <p className="py-20 text-center font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.28em] text-white/40">
-            Loading fragrances
-          </p>
-        ) : null}
-
-        {hasError ? (
-          <p className="py-20 text-center font-['Inter',sans-serif] text-sm text-white/50">
-            Unable to load fragrances. Please try again.
-          </p>
-        ) : null}
-
-        {!isLoading && !hasError ? (
-          <>
         {/* RESULT COUNT */}
         <div className="mb-8 flex items-center justify-between">
           <p className="font-['Inter',sans-serif] text-[10px] uppercase tracking-[0.25em] text-white/40">
@@ -237,8 +192,6 @@ function ShopContent() {
             </Link>
           </div>
         )}
-          </>
-        ) : null}
       </section>
     </div>
   );

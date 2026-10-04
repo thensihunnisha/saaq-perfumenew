@@ -90,7 +90,7 @@ export default function CollectionWorld({
           </Reveal>
 
           <div className="mt-14">
-            <ProductGrid products={products} />
+            <ProductGrid products={products} tone="light" />
           </div>
         </Container>
       </Section>

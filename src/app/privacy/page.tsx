@@ -16,7 +16,7 @@ export default function PrivacyPage() {
       sections={[
         {
           heading: "What we collect",
-          body: "When you write to us, place an enquiry, or complete checkout, we may receive your name, email, phone, and delivery address. The bag and wishlist on this site are stored in your browser, not on a SAAQ server.",
+          body: "When you write to us, place an enquiry, or order on WhatsApp, we may receive your name, email, phone, and delivery address. The bag and wishlist on this site are stored in your browser, not on a SAAQ server.",
         },
         {
           heading: "How we use it",

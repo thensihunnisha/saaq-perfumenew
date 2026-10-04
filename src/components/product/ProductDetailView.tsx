@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Heart, Minus, Plus } from "lucide-react";
 import ProductGrid from "@/components/ProductGrid";
 import Reveal from "@/components/Reveal";
@@ -26,6 +26,15 @@ export default function ProductDetailView({
   product,
   related,
 }: ProductDetailViewProps) {
+  return (
+    <ProductDetailBody key={product.id} product={product} related={related} />
+  );
+}
+
+function ProductDetailBody({
+  product,
+  related,
+}: ProductDetailViewProps) {
   const { addItem, openDrawer } = useCart();
   const { isSaved, toggleItem } = useWishlist();
   const [quantity, setQuantity] = useState(1);
@@ -34,11 +43,6 @@ export default function ProductDetailView({
   const saved = isSaved(product.id);
   const collectionLabel = COLLECTION_LABELS[product.collection];
   const story = getFragranceStory(product);
-
-  useEffect(() => {
-    setQuantity(1);
-    setAdded(false);
-  }, [product.id]);
 
   const decrease = () => {
     setQuantity((current) => Math.max(1, current - 1));

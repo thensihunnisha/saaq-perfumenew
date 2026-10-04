@@ -1,241 +1,196 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowDown, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
-import { Body, DisplayHeading } from "@/components/ui";
+import { useEffect, useRef, useState } from "react";
 import { ButtonLink } from "@/components/ui/Button";
+import type { HeroMotionState } from "@/components/home/heroMotion";
+import { initialHeroMotion } from "@/components/home/heroMotion";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { cn } from "@/lib/cn";
 
-const SLIDE_INTERVAL_MS = 6500;
-const SWIPE_THRESHOLD = 48;
+const HeroBottleCanvas = dynamic(() => import("@/components/home/HeroBottleCanvas"), {
+  ssr: false,
+});
 
-const SLIDES = [
-  {
-    eyebrow: "The House of SAAQ",
-    title: "SAAQ",
-    line: "The Art of Signature Fragrance",
-    body: "Fragrance is not simply worn. It becomes your signature — an expression of presence, character, and unforgettable elegance.",
-    image: "/images/banners/saaq-home-hero.png",
-    imageClassName:
-      "object-[88%_78%] sm:object-[78%_50%] lg:object-[82%_55%]",
-    href: "/collection",
-    cta: "Explore Collection",
-    secondaryHref: "/story",
-    secondaryCta: "Discover SAAQ",
-  },
-  {
-    eyebrow: "Collection 01",
-    title: "Take Off",
-    line: "Created for movement, freedom, and modern adventure.",
-    body: "Bold woods, spice, and aquatic brightness meet in a trail that travels as you do.",
-    image: "/images/collections/takeoff-home.jpg",
-    imageClassName: "object-center",
-    href: "/collection/takeoff",
-    cta: "Discover Take Off",
-  },
-  {
-    eyebrow: "Collection 02",
-    title: "Gems",
-    line: "Precious. Rare. Unforgettable.",
-    body: "Each fragrance is faceted — light, depth, and a lingering brilliance that reveals itself slowly.",
-    image: "/images/collections/gems-home.jpg",
-    imageClassName: "object-center sm:object-[center_30%]",
-    href: "/collection/gems",
-    cta: "Discover Gems",
-  },
-] as const;
+const HEADLINE = ["SCENT", "THAT", "DEFINES", "YOU."];
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
 
 export default function Hero() {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const touchStartX = useRef<number | null>(null);
+  const reduced = usePrefersReducedMotion();
+  const sectionRef = useRef<HTMLElement>(null);
+  const motionRef = useRef<HeroMotionState>(initialHeroMotion());
+  const [ready, setReady] = useState(false);
+  const [stageReady, setStageReady] = useState(false);
+  const [compact, setCompact] = useState(false);
 
-  const goTo = useCallback((index: number) => {
-    setActive((index + SLIDES.length) % SLIDES.length);
-  }, []);
-
-  const next = useCallback(() => {
-    setActive((current) => (current + 1) % SLIDES.length);
-  }, []);
-
-  const previous = useCallback(() => {
-    setActive((current) => (current - 1 + SLIDES.length) % SLIDES.length);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setReady(true));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const media = window.matchMedia("(max-width: 767px)");
+    const update = () => setCompact(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
-    if (paused || motion.matches) {
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) {
       return;
     }
 
-    const timer = window.setInterval(next, SLIDE_INTERVAL_MS);
-    return () => window.clearInterval(timer);
-  }, [next, paused]);
+    const updateProgress = () => {
+      const rect = section.getBoundingClientRect();
+      const travel = Math.max(section.offsetHeight - window.innerHeight, 1);
+      motionRef.current.progress = clamp(-rect.top / travel, 0, 1);
+    };
 
-  const slide = SLIDES[active];
+    updateProgress();
+    window.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("resize", updateProgress);
+    return () => {
+      window.removeEventListener("scroll", updateProgress);
+      window.removeEventListener("resize", updateProgress);
+    };
+  }, []);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || reduced) {
+      return;
+    }
+
+    const fine = window.matchMedia("(hover: hover) and (pointer: fine)");
+    if (!fine.matches) {
+      return;
+    }
+
+    const onMove = (event: MouseEvent) => {
+      const rect = section.getBoundingClientRect();
+      motionRef.current.pointerX = (event.clientX - rect.left) / rect.width - 0.5;
+      motionRef.current.pointerY = (event.clientY - rect.top) / rect.height - 0.5;
+    };
+
+    const onLeave = () => {
+      motionRef.current.pointerX = 0;
+      motionRef.current.pointerY = 0;
+    };
+
+    section.addEventListener("mousemove", onMove);
+    section.addEventListener("mouseleave", onLeave);
+    return () => {
+      section.removeEventListener("mousemove", onMove);
+      section.removeEventListener("mouseleave", onLeave);
+    };
+  }, [reduced]);
 
   return (
     <section
-      className="relative isolate h-[100svh] min-h-[100svh] max-h-[1100px] overflow-hidden bg-[#070706] md:min-h-[640px] lg:min-h-[680px]"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onTouchStart={(event) => {
-        touchStartX.current = event.touches[0]?.clientX ?? null;
-      }}
-      onTouchEnd={(event) => {
-        if (touchStartX.current == null) {
-          return;
-        }
-
-        const delta = (event.changedTouches[0]?.clientX ?? 0) - touchStartX.current;
-        touchStartX.current = null;
-
-        if (Math.abs(delta) < SWIPE_THRESHOLD) {
-          return;
-        }
-
-        if (delta < 0) {
-          next();
-        } else {
-          previous();
-        }
-      }}
-      aria-roledescription="carousel"
-      aria-label="SAAQ featured collections"
+      ref={sectionRef}
+      className="relative isolate h-[220svh]"
     >
       <div
-        className="absolute inset-0 flex saaq-transition duration-700 ease-out"
-        style={{ transform: `translateX(-${active * 100}%)` }}
+        className={cn(
+          "sticky top-0 isolate min-h-[100svh] overflow-hidden bg-[#070706]",
+          ready && "saaq-hero-ready"
+        )}
       >
-        {SLIDES.map((item, index) => (
-          <div key={item.image} className="relative h-full w-full shrink-0">
+        <div
+          aria-hidden
+          className="saaq-hero-orb pointer-events-none absolute right-[12%] top-[16%] h-64 w-64 rounded-full bg-saaq-gold/16 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="saaq-hero-mist pointer-events-none absolute bottom-[8%] left-[18%] h-72 w-72 bg-saaq-gold/10 blur-[100px]"
+        />
+
+        <div className="saaq-hero-stage pointer-events-none absolute inset-0 lg:left-[22%]">
+          {!stageReady ? (
             <Image
-              src={item.image}
+              src="/images/products/hero-emerald.jpg"
               alt=""
               fill
-              priority={index === 0}
+              priority
               sizes="100vw"
-              className={cn("object-cover", item.imageClassName)}
+              className="object-contain object-center opacity-80"
             />
-          </div>
-        ))}
-      </div>
+          ) : null}
+          <HeroBottleCanvas
+            motionRef={motionRef}
+            reduced={reduced}
+            compact={compact}
+            onReady={() => setStageReady(true)}
+          />
+        </div>
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/30 sm:hidden" />
-      <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-[58%] bg-gradient-to-r from-black/80 via-black/45 to-transparent sm:block" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/40 sm:bg-gradient-to-r sm:from-black/72 sm:via-black/15 sm:to-transparent" />
+        <div className="saaq-hero-veil pointer-events-none absolute inset-0 bg-black" />
 
-      <div className="relative z-20 flex h-full items-start px-5 pb-24 pt-[calc(var(--saaq-header-offset)+0.75rem)] sm:items-center sm:px-10 sm:pb-0 sm:pt-16 md:px-16 lg:px-24">
-        <div className="max-w-xl min-w-0 lg:max-w-2xl" aria-live="polite">
-          <div className="mb-5 flex items-center gap-3">
-            <Sparkles size={13} strokeWidth={1} className="shrink-0 text-saaq-gold" />
-            <span className="min-w-0 font-sans text-[9px] uppercase tracking-[0.28em] text-saaq-gold drop-shadow-[0_2px_12px_rgba(0,0,0,0.85)] sm:text-[10px] sm:tracking-[0.48em]">
-              {slide.eyebrow}
-            </span>
-          </div>
-
-          <DisplayHeading
-            as="h1"
-            className="text-saaq-cream drop-shadow-[0_8px_24px_rgba(0,0,0,0.75)]"
-          >
-            {slide.title}
-          </DisplayHeading>
-
-          <div className="mt-5 h-px w-24 bg-gradient-to-r from-saaq-gold to-transparent" />
-
-          <p className="mt-5 max-w-lg text-pretty font-display text-lg leading-[1.25] text-saaq-ivory drop-shadow-[0_6px_18px_rgba(0,0,0,0.7)] sm:mt-6 sm:text-3xl lg:text-[40px]">
-            {slide.line}
-          </p>
-
-          <div className="mt-6 max-w-md">
-            <Body className="text-sm leading-7 text-saaq-cream/90 drop-shadow-[0_4px_14px_rgba(0,0,0,0.7)] sm:text-base">
-              {slide.body}
-            </Body>
-          </div>
-
-          <div className="mt-8 flex flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap">
-            <ButtonLink href={slide.href} size="lg" className="w-full text-center sm:w-auto">
-              {slide.cta}
-            </ButtonLink>
-            {"secondaryHref" in slide && slide.secondaryHref ? (
+        <div className="relative z-10 flex min-h-[100svh] items-end px-5 pb-24 pt-[calc(var(--saaq-header-offset)+0.75rem)] sm:items-center sm:px-10 sm:pb-20 md:px-16 lg:px-24">
+          <div className="max-w-xl min-w-0 lg:max-w-2xl">
+            <p className="saaq-hero-rise font-sans text-[10px] uppercase tracking-[0.32em] text-saaq-gold sm:tracking-[0.42em]">
+              SAAQ PARFUMS
+            </p>
+            <h1 className="mt-4 font-display text-[clamp(2.15rem,5.4vw,4.6rem)] leading-[0.9] tracking-[-0.04em] text-saaq-cream">
+              {HEADLINE.map((line, index) => (
+                <span
+                  key={line}
+                  className={cn(
+                    "saaq-hero-line block",
+                    `saaq-hero-line-${index + 1}`
+                  )}
+                >
+                  {line}
+                </span>
+              ))}
+            </h1>
+            <p className="saaq-hero-rise saaq-hero-delay-3 mt-5 max-w-md font-sans text-sm leading-7 text-saaq-ivory/80 sm:mt-6">
+              Fragrance created for those who leave an impression.
+            </p>
+            <div className="saaq-hero-rise saaq-hero-delay-4 mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">
+              <ButtonLink href="/collection" size="lg" className="w-full text-center sm:w-auto">
+                Explore Collection
+              </ButtonLink>
               <ButtonLink
-                href={slide.secondaryHref}
+                href="/story"
                 variant="outline"
                 size="lg"
                 className="w-full text-center sm:w-auto"
               >
-                {slide.secondaryCta}
+                Discover SAAQ
               </ButtonLink>
-            ) : null}
-          </div>
-
-          <div className="mt-8 flex items-center gap-4">
-            <span className="h-px w-8 bg-[#d4af37]/60" />
-            <span className="text-[8px] uppercase tracking-[0.35em] text-saaq-beige drop-shadow-[0_2px_10px_rgba(0,0,0,0.7)]">
-              {active + 1} / {SLIDES.length}
-            </span>
+            </div>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={() => {
+            const section = sectionRef.current;
+            const top = section
+              ? section.offsetTop + section.offsetHeight - 24
+              : window.innerHeight * 0.92;
+            window.scrollTo({
+              top,
+              behavior: reduced ? "auto" : "smooth",
+            });
+          }}
+          className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center gap-3"
+          aria-label="Scroll to discover"
+        >
+          <span className="font-sans text-[9px] uppercase tracking-[0.32em] text-saaq-ivory/55">
+            Scroll to discover
+          </span>
+          <span className="saaq-scroll-line" />
+        </button>
       </div>
-
-      <div className="absolute bottom-7 left-1/2 z-30 flex -translate-x-1/2 items-center gap-3 sm:bottom-10 sm:left-8 sm:translate-x-0">
-        {SLIDES.map((item, index) => (
-          <button
-            key={item.title}
-            type="button"
-            aria-label={`Show ${item.title}`}
-            aria-current={index === active ? true : undefined}
-            onClick={() => goTo(index)}
-            className={cn(
-              "saaq-transition h-1.5 rounded-full",
-              index === active
-                ? "w-8 bg-saaq-gold"
-                : "w-4 bg-white/30 hover:bg-saaq-gold/70"
-            )}
-          />
-        ))}
-      </div>
-
-      <button
-        type="button"
-        onClick={previous}
-        aria-label="Previous slide"
-        className="saaq-transition absolute left-4 top-1/2 z-30 hidden h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/20 text-saaq-ivory hover:border-saaq-gold hover:text-saaq-gold md:flex lg:left-6"
-      >
-        <ChevronLeft size={18} strokeWidth={1.4} />
-      </button>
-      <button
-        type="button"
-        onClick={next}
-        aria-label="Next slide"
-        className="saaq-transition absolute right-4 top-1/2 z-30 hidden h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/20 text-saaq-ivory hover:border-saaq-gold hover:text-saaq-gold md:flex lg:right-6"
-      >
-        <ChevronRight size={18} strokeWidth={1.4} />
-      </button>
-
-      <button
-        type="button"
-        onClick={() =>
-          window.scrollTo({
-            top: window.innerHeight * 0.9,
-            behavior: "smooth",
-          })
-        }
-        className="absolute bottom-7 right-6 z-30 hidden flex-col items-center gap-2 sm:flex lg:right-10"
-        aria-label="Scroll to explore"
-      >
-        <span className="font-sans text-[8px] uppercase tracking-[0.35em] text-saaq-ivory/50 [writing-mode:vertical-rl]">
-          Scroll
-        </span>
-        <span className="h-10 w-px bg-gradient-to-b from-[#d4af37] to-transparent sm:h-12" />
-        <ArrowDown
-          size={13}
-          strokeWidth={1}
-          className="saaq-hero-scroll-icon text-[#d4af37]"
-        />
-      </button>
     </section>
   );
 }

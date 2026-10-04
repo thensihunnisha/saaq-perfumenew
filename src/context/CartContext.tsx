@@ -10,7 +10,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import type { Product } from "@/data/products";
+import { getProductById, type Product } from "@/data/products";
 
 const CART_STORAGE_KEY = "saaq-cart";
 const EMPTY_CART: CartItem[] = [];
@@ -62,10 +62,19 @@ function parseCart(raw: string | null): CartItem[] {
       return EMPTY_CART;
     }
 
-    return parsed.map((item) => ({
-      ...item,
-      category: item.category || item.collection,
-    }));
+    return parsed.map((item) => {
+      const product = getProductById(String(item.id));
+
+      return {
+        ...item,
+        name: product?.name ?? item.name,
+        collection: product?.collection ?? item.collection,
+        category: product?.category || item.category || item.collection,
+        price: product?.price ?? item.price,
+        image: product?.image ?? item.image,
+        description: product?.description ?? item.description,
+      };
+    });
   } catch {
     return EMPTY_CART;
   }
@@ -142,10 +151,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const items = isReady ? storedItems : EMPTY_CART;
 
   useEffect(() => {
-    readCartFromStorage();
-    canReadClientCart = true;
-    setIsReady(true);
-    emitCart();
+    const ready = window.setTimeout(() => {
+      readCartFromStorage();
+      canReadClientCart = true;
+      setIsReady(true);
+      emitCart();
+    }, 0);
+
+    return () => window.clearTimeout(ready);
   }, []);
 
   const addItem = useCallback(

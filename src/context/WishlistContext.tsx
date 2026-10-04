@@ -10,7 +10,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import type { Product } from "@/data/products";
+import { getProductById, type Product } from "@/data/products";
 
 const WISHLIST_STORAGE_KEY = "saaq-wishlist";
 const EMPTY_WISHLIST: Product[] = [];
@@ -39,7 +39,12 @@ function parseWishlist(raw: string | null): Product[] {
 
   try {
     const parsed = JSON.parse(raw) as Product[];
-    return Array.isArray(parsed) ? parsed : EMPTY_WISHLIST;
+
+    if (!Array.isArray(parsed)) {
+      return EMPTY_WISHLIST;
+    }
+
+    return parsed.map((item) => getProductById(String(item.id)) ?? item);
   } catch {
     return EMPTY_WISHLIST;
   }
@@ -115,10 +120,14 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const items = isReady ? storedItems : EMPTY_WISHLIST;
 
   useEffect(() => {
-    readWishlistFromStorage();
-    canReadClientWishlist = true;
-    setIsReady(true);
-    emitWishlist();
+    const ready = window.setTimeout(() => {
+      readWishlistFromStorage();
+      canReadClientWishlist = true;
+      setIsReady(true);
+      emitWishlist();
+    }, 0);
+
+    return () => window.clearTimeout(ready);
   }, []);
 
   const isSaved = useCallback(

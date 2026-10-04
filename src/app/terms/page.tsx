@@ -23,7 +23,7 @@ export default function TermsPage() {
         },
         {
           heading: "Pricing",
-          body: "Prices are shown in AED. Shipping, if charged, is calculated in the bag and at checkout. Complimentary UAE delivery applies from the threshold shown in your bag.",
+          body: "Prices are shown in AED. Shipping, if charged, is calculated in the bag and confirmed on WhatsApp. Complimentary UAE delivery applies from the threshold shown in your bag.",
         },
         {
           heading: "Website use",

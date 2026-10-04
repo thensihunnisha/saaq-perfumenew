@@ -4,6 +4,7 @@ export type Gender = "men" | "women" | "unisex";
 export type Product = {
   id: string;
   name: string;
+  brand?: string;
   category: string;
   collection: CollectionSlug;
   gender: Gender;
@@ -13,6 +14,7 @@ export type Product = {
   description: string;
   story?: string;
   featured?: boolean;
+  stock?: number;
 };
 
 export const COLLECTION_LABELS: Record<CollectionSlug, string> = {
@@ -32,12 +34,13 @@ export const products: Product[] = [
   {
     id: "noir",
     name: "Noir Enj",
+    brand: "SAAQ",
     category: "Take Off",
     collection: "takeoff",
     gender: "men",
     featured: true,
-    price: 299,
-    compareAtPrice: 349,
+    price: 60,
+    stock: 10,
     image: "/images/products/noireng.jpg",
     description:
       "Noir Enj by Saaq is a Woody Aquatic fragrance for women and men. Noir by Saaq was launched in 2022. The nose behind this fragrance is Marie Salamagne. Top notes are Incense and Coriander; middle notes are Caviar, Mate and Dreamwood; base notes are Sandalwood, Guaiac Wood and Cashmere Wood",
@@ -45,10 +48,12 @@ export const products: Product[] = [
   {
     id: "oceanmle",
     name: "Ocean Mle",
+    brand: "SAAQ",
     category: "Take Off",
     collection: "takeoff",
     gender: "unisex",
-    price: 249,
+    price: 60,
+    stock: 10,
     image: "/images/products/oceanmle.jpg",
     description:
       "Ocean Man by BellaVita is a fragrance for women and men. Ocean Man was launched in 2023. Top notes are Aquatic notes, Citrus and Salt; middle notes are Orchid and Floral Notes; base notes are Musk and Woody Notes.",
@@ -56,10 +61,12 @@ export const products: Product[] = [
   {
     id: "opulance",
     name: "Opulance Ccj",
+    brand: "SAAQ",
     category: "Take Off",
     collection: "takeoff",
     gender: "men",
-    price: 279,
+    price: 60,
+    stock: 10,
     image: "/images/products/opulance.jpeg",
     description:
       "OPULENCE OF DUBAI by Swiss Arabian is a Woody Spicy fragrance for women and men. OPULENCE OF DUBAI was launched in 2023. The nose behind this fragrance is Ilias Ermenidis. Top notes are Nigerian Ginger, elemi and Calabrian bergamot; middle notes are Damask Rose, Cardamom, Pink Pepper and Chocolate; base notes are Incense, Atlas Cedar, Cypriol Oil or Nagarmotha, Amber, Bourbon Vanilla, Vetiver and Roasted Coffee Beans.",
@@ -67,10 +74,12 @@ export const products: Product[] = [
   {
     id: "ouddxb",
     name: "Oud Dxb",
+    brand: "SAAQ",
     category: "Take Off",
     collection: "takeoff",
     gender: "men",
-    price: 279,
+    price: 60,
+    stock: 10,
     image: "/images/products/ouddxb.jpg",
     description:
       "OPULENCE OF DUBAI by Swiss Arabian is a Woody Spicy fragrance for women and men. OPULENCE OF DUBAI was launched in 2023. The nose behind this fragrance is Ilias Ermenidis. Top notes are Nigerian Ginger, elemi and Calabrian bergamot; middle notes are Damask Rose, Cardamom, Pink Pepper and Chocolate; base notes are Incense, Atlas Cedar, Cypriol Oil or Nagarmotha, Amber, Bourbon Vanilla, Vetiver and Roasted Coffee Beans.",
@@ -78,10 +87,12 @@ export const products: Product[] = [
   {
     id: "silent",
     name: "Silent Zrh",
+    brand: "SAAQ",
     category: "Take Off",
     collection: "takeoff",
     gender: "men",
-    price: 279,
+    price: 60,
+    stock: 10,
     image: "/images/products/silentZrh.jpg",
     description:
       "OPULENCE OF DUBAI by Swiss Arabian is a Woody Spicy fragrance for women and men. OPULENCE OF DUBAI was launched in 2023. The nose behind this fragrance is Ilias Ermenidis. Top notes are Nigerian Ginger, elemi and Calabrian bergamot; middle notes are Damask Rose, Cardamom, Pink Pepper and Chocolate; base notes are Incense, Atlas Cedar, Cypriol Oil or Nagarmotha, Amber, Bourbon Vanilla, Vetiver and Roasted Coffee Beans.",
@@ -89,10 +100,12 @@ export const products: Product[] = [
   {
     id: "vanillamex",
     name: "Vanilla Mex",
+    brand: "SAAQ",
     category: "Take Off",
     collection: "takeoff",
     gender: "women",
-    price: 279,
+    price: 60,
+    stock: 10,
     image: "/images/products/vanillamex.jpeg",
     description:
       "Vanilla by Tom Ford is a Oriental Vanilla fragrance for women and men. Vanilla was launched in 2023. The fragrance features Indian Vanilla, Vanilla Absolute, Sandalwood, Animal notes, Orris Root and Jasmine.",
@@ -100,11 +113,13 @@ export const products: Product[] = [
   {
     id: "velvetkul",
     name: "Velvet Kul",
+    brand: "SAAQ",
     category: "Take Off",
     collection: "takeoff",
     gender: "unisex",
     featured: true,
-    price: 279,
+    price: 60,
+    stock: 10,
     image: "/images/products/velvetkul.jpg",
     description:
       "OPULENCE OF DUBAI by Swiss Arabian is a Woody Spicy fragrance for women and men. OPULENCE OF DUBAI was launched in 2023. The nose behind this fragrance is Ilias Ermenidis. Top notes are Nigerian Ginger, elemi and Calabrian bergamot; middle notes are Incense, Atlas Cedar, Cypriol Oil or Nagarmotha, Amber, Bourbon Vanilla, Vetiver and Roasted Coffee Beans.",
@@ -112,12 +127,13 @@ export const products: Product[] = [
   {
     id: "emerald",
     name: "Emerald",
+    brand: "SAAQ",
     category: "Gems",
     collection: "gems",
     gender: "women",
     featured: true,
-    price: 279,
-    compareAtPrice: 329,
+    price: 120,
+    stock: 10,
     image: "/images/products/emrld.jpeg",
     description:
       "Emerald by Saaq is a Floral Fruity fragrance for women and men. Emerald was launched in 2022. The nose behind this fragrance is Camille Gazal. Top notes are Pink Pepper, Red Berries and Strawberry; middle notes are Lily of the Valley, Jasmine and Ylang-Ylang; base notes are Patchouli, Sandalwood and Vanilla.",
@@ -125,19 +141,32 @@ export const products: Product[] = [
   {
     id: "crystl",
     name: "Crystl",
+    brand: "SAAQ",
     category: "Gems",
     collection: "gems",
     gender: "women",
     featured: true,
-    price: 279,
+    price: 120,
+    stock: 10,
     image: "/images/products/crystal.png",
     description:
       "Crystl by Saaq is a Floral Fruity fragrance for women and men. Crystl was launched in 2022. The nose behind this fragrance is Camille Gazal. Top notes are Pink Pepper, Red Berries and Strawberry; middle notes are Lily of the Valley, Jasmine and Ylang-Ylang; base notes are Patchouli, Sandalwood and Vanilla.",
   },
 ];
 
+function productImageStem(image: string) {
+  const file = image.split("/").pop() ?? "";
+  return file.replace(/\.[^.]+$/, "").toLowerCase();
+}
+
 export function getProductById(id: string): Product | undefined {
-  return products.find((product) => product.id === id);
+  const needle = id.trim().toLowerCase();
+
+  return products.find(
+    (product) =>
+      product.id.toLowerCase() === needle ||
+      productImageStem(product.image) === needle
+  );
 }
 
 export function getFragranceStory(product: Product): string {
@@ -178,9 +207,11 @@ export function searchProducts(catalog: Product[], query: string): Product[] {
   return catalog.filter((product) => {
     const haystack = [
       product.name,
+      product.brand ?? "SAAQ",
       product.category,
       product.collection,
       COLLECTION_LABELS[product.collection],
+      `${COLLECTION_LABELS[product.collection]} Collection`,
       product.gender,
       GENDER_LABELS[product.gender],
       product.description,

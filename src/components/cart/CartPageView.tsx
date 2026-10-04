@@ -216,7 +216,7 @@ export default function CartPageView() {
           <aside className="h-fit border border-saaq-gold/20 bg-saaq-void lg:sticky lg:top-28">
             <div className="border-b border-white/10 px-6 py-6 sm:px-8">
               <Eyebrow>Order summary</Eyebrow>
-              <h2 className="saaq-h3 mt-3">Checkout</h2>
+              <h2 className="saaq-h3 mt-3">Your order</h2>
             </div>
 
             <div className="space-y-4 px-6 py-6 font-sans text-sm sm:px-8">
@@ -269,30 +269,16 @@ export default function CartPageView() {
               </div>
             </div>
 
-            <div className="space-y-6 border-t border-white/10 px-6 py-7 sm:px-8">
-              <div>
-                <p className="saaq-eyebrow">Option 1</p>
-                <p className="mt-2 font-sans text-xs leading-6 text-saaq-ivory/50">
-                  Send this bag to SAAQ on WhatsApp to confirm availability and
-                  delivery. Payment details are never sent here.
-                </p>
-                <WhatsAppButton
-                  className="mt-4"
-                  items={toWhatsAppOrderItems(items)}
-                  label="Order via WhatsApp"
-                />
-              </div>
-
-              <div>
-                <p className="saaq-eyebrow">Option 2</p>
-                <p className="mt-2 font-sans text-xs leading-6 text-saaq-ivory/50">
-                  Continue to checkout. Card payment will be connected through a
-                  secure gateway later.
-                </p>
-                <ButtonLink href="/checkout" className="mt-4 w-full">
-                  Proceed to Checkout
-                </ButtonLink>
-              </div>
+            <div className="border-t border-white/10 px-6 py-7 sm:px-8">
+              <p className="font-sans text-xs leading-6 text-saaq-ivory/50">
+                Send this bag to SAAQ on WhatsApp to confirm availability and
+                delivery. Payment details are never sent here.
+              </p>
+              <WhatsAppButton
+                className="mt-4"
+                items={toWhatsAppOrderItems(items)}
+                label="Order via WhatsApp"
+              />
             </div>
           </aside>
         </div>

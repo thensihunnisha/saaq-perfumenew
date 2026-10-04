@@ -13,12 +13,19 @@ import { getProductHref } from "@/lib/api";
 
 type ProductCardProps = {
   product: Product;
+  featured?: boolean;
+  tone?: "dark" | "light";
 };
 
 const iconButtonClass =
   "saaq-transition flex h-10 w-10 items-center justify-center border border-white/20 bg-saaq-black/55 text-saaq-ivory backdrop-blur-sm hover:border-saaq-gold hover:text-saaq-gold";
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  featured = false,
+  tone = "dark",
+}: ProductCardProps) {
+  const light = tone === "light";
   const { addItem, openDrawer, itemCount } = useCart();
   const { isSaved, toggleItem } = useWishlist();
   const [added, setAdded] = useState(false);
@@ -54,9 +61,20 @@ export default function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <article className="group">
-      <div className="relative aspect-[4/5] overflow-hidden bg-saaq-charcoal">
-        <Link href={href} className="absolute inset-0 z-0 block">
+    <article
+      className={cn(
+        "group",
+        light &&
+          "saaq-transition border border-saaq-gold/25 bg-saaq-ivory p-3 hover:border-saaq-gold/60 sm:p-4"
+      )}
+    >
+      <div
+        className={cn(
+          "relative overflow-hidden bg-saaq-charcoal",
+          featured ? "aspect-[4/5] lg:aspect-[3/4]" : "aspect-[4/5]"
+        )}
+      >
+        <Link href={href} data-cursor="view" className="absolute inset-0 z-0 block">
           <Image
             src={product.image}
             alt={product.name}
@@ -131,19 +149,45 @@ export default function ProductCard({ product }: ProductCardProps) {
         ) : null}
       </div>
 
-      <div className="pt-5">
+      <div
+        className={cn(
+          "saaq-transition pt-5 group-hover:-translate-y-1",
+          light && "px-1 pb-1"
+        )}
+      >
         <Link href={href} className="block">
-          <p className="saaq-eyebrow">{COLLECTION_LABELS[product.collection]}</p>
-          <h2 className="saaq-transition mt-2 font-display text-[1.2rem] leading-tight text-saaq-ivory group-hover:text-saaq-gold sm:text-[1.35rem]">
+          <p className={cn("saaq-eyebrow", light && "text-[#8a6a3c]!")}>
+            {COLLECTION_LABELS[product.collection]}
+          </p>
+          <h2
+            className={cn(
+              "saaq-transition mt-2 font-display text-[1.2rem] leading-tight sm:text-[1.35rem]",
+              light
+                ? "text-saaq-black group-hover:text-[#8a6a3c]"
+                : "text-saaq-ivory group-hover:text-saaq-gold"
+            )}
+          >
             {product.name}
           </h2>
-          <p className="saaq-meta mt-2">{product.category}</p>
+          <p className={cn("saaq-meta mt-2", light && "text-saaq-black/50!")}>
+            {product.category}
+          </p>
           <div className="mt-3 flex items-baseline gap-3">
-            <p className="font-sans text-sm tracking-[0.08em] text-saaq-ivory/80">
+            <p
+              className={cn(
+                "font-sans text-sm tracking-[0.08em]",
+                light ? "text-saaq-black/85" : "text-saaq-ivory/80"
+              )}
+            >
               AED {product.price.toFixed(2)}
             </p>
             {hasOldPrice ? (
-              <p className="font-sans text-xs tracking-[0.06em] text-saaq-ivory/35 line-through">
+              <p
+                className={cn(
+                  "font-sans text-xs tracking-[0.06em] line-through",
+                  light ? "text-saaq-black/40" : "text-saaq-ivory/35"
+                )}
+              >
                 AED {product.compareAtPrice?.toFixed(2)}
               </p>
             ) : null}

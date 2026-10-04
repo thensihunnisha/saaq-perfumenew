@@ -1,40 +1,30 @@
 import Hero from "@/components/Hero";
 import BrandIntro from "@/components/home/BrandIntro";
-import CollectionFeature from "@/components/home/CollectionFeature";
+import CampaignBanner from "@/components/home/CampaignBanner";
+import CollectionShowcase from "@/components/home/CollectionShowcase";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
 import FinalCta from "@/components/home/FinalCta";
+import GemsCampaign from "@/components/home/GemsCampaign";
 import OffersSection from "@/components/home/OffersSection";
-import StoryPreview from "@/components/home/StoryPreview";
-import { getProducts, pickFeaturedProducts } from "@/lib/api";
+import BrandStory from "@/components/home/BrandStory";
+import TakeoffCampaign from "@/components/home/TakeoffCampaign";
+import { products } from "@/data/products";
+import { pickFeaturedProducts } from "@/lib/api";
 
 export default async function Home() {
-  const catalog = await getProducts().catch(() => []);
-  const featuredProducts = pickFeaturedProducts(catalog, 4);
+  const featuredProducts = pickFeaturedProducts(products, 4);
 
   return (
     <>
       <Hero />
       <BrandIntro />
-      <OffersSection />
-      <CollectionFeature
-        eyebrow="Collection 02"
-        title="Gems Collection"
-        statement="Precious. Rare. Unforgettable."
-        href="/collection/gems"
-        cta="Discover Gems"
-        image="/images/collections/gems-home.jpg"
-      />
-      <CollectionFeature
-        eyebrow="Collection 01"
-        title="Take Off Collection"
-        statement="A fragrance created for movement, freedom and modern adventure."
-        href="/collection/takeoff"
-        cta="Discover Take Off"
-        image="/images/collections/takeoff-home.jpg"
-        reverse
-      />
+      <CollectionShowcase />
       <FeaturedProducts products={featuredProducts} />
-      <StoryPreview />
+      <CampaignBanner />
+      <GemsCampaign />
+      <TakeoffCampaign />
+      <OffersSection />
+      <BrandStory />
       <FinalCta />
     </>
   );

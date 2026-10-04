@@ -6,9 +6,14 @@ import { cn } from "@/lib/cn";
 type ProductGridProps = {
   products: Product[];
   className?: string;
+  tone?: "dark" | "light";
 };
 
-export default function ProductGrid({ products, className }: ProductGridProps) {
+export default function ProductGrid({
+  products,
+  className,
+  tone = "dark",
+}: ProductGridProps) {
   if (products.length === 0) {
     return (
       <p className="saaq-body py-16 text-center">
@@ -26,7 +31,7 @@ export default function ProductGrid({ products, className }: ProductGridProps) {
     >
       {products.map((product, index) => (
         <Reveal key={product.id} delay={(index % 4) * 80}>
-          <ProductCard product={product} />
+          <ProductCard product={product} tone={tone} />
         </Reveal>
       ))}
     </div>
